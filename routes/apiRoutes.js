@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Bin = require('../models/Bin');
 const User = require('../models/User');
+const Report = require('../models/Report');
 const { requireAuth } = require('./authRoutes');
 
 // API: Get all bins as JSON
@@ -98,22 +99,43 @@ router.get('/map', async (req, res) => {
   });
 });
 
-// Scanner placeholder / guidance view for mobile bottom nav
-router.get('/scanner', (req, res) => {
-  let user = null;
-  if (req.session && req.session.userId) {
-    User.findById(req.session.userId).then((u) => {
-      res.render('scanner', {
-        pageTitle: 'Smart Scanner',
-        activeTab: 'scanner',
-        user: u
-      });
-    });
-  } else {
+// Smart Waste Scanner View
+router.get('/scanner', async (req, res) => {
+  try {
+    let user = null;
+    let reports = [];
+
+    if (req.session && req.session.userId) {
+      user = await User.findById(req.session.userId);
+      if (user) {
+        reports = await Report.find({ userId: user._id })
+          .sort({ createdAt: -1 })
+          .limit(8);
+      }
+    } else {
+      // Find or seed demo user so scanner history shows clean BMC civic tickets
+      const demoUser = await User.findOne({ email: 'smarak.citizen@bhubaneswar.gov.in' });
+      if (demoUser) {
+        user = demoUser;
+        reports = await Report.find({ userId: demoUser._id })
+          .sort({ createdAt: -1 })
+          .limit(8);
+      }
+    }
+
     res.render('scanner', {
       pageTitle: 'Smart Scanner',
       activeTab: 'scanner',
-      user: null
+      user,
+      reports
+    });
+  } catch (err) {
+    console.error('Error loading scanner view:', err);
+    res.render('scanner', {
+      pageTitle: 'Smart Scanner',
+      activeTab: 'scanner',
+      user: null,
+      reports: []
     });
   }
 });

@@ -91,7 +91,7 @@ async function runTests() {
     assert(accountRes.statusCode === 200, 'GET /account returns 200 OK with session');
     assert(accountRes.body.includes('Smarak Mohapatra'), 'Demo citizen name "Smarak Mohapatra" rendered');
     assert(accountRes.body.includes('smarak.citizen@bhubaneswar.gov.in'), 'Demo citizen email rendered');
-    assert(accountRes.body.includes('120') && accountRes.body.includes('Green Credits Balance'), '120 Green Credits displayed in hero card');
+    assert(/id="creditsHeroCount"[^>]*>\d+</.test(accountRes.body) && accountRes.body.includes('Green Credits Balance'), 'Green Credits Balance displayed in hero card');
     assert(accountRes.body.includes('Mo Khata Citizen Tier 1'), 'Mo Khata Citizen Tier 1 badge displayed');
     assert(accountRes.body.includes('Ward 1 - Patia') && accountRes.body.includes('Ward 26 - Jaydev Vihar'), 'BMC Ward options (Patia, Jaydev Vihar, Saheed Nagar, Old Town, Bapuji Nagar, Khandagiri) rendered in dropdown');
     assert(accountRes.body.includes('autoVoiceToggle'), 'Auto-Voice Readout toggle switch present');
@@ -155,7 +155,7 @@ async function runTests() {
     const scannerRes = await request('/scanner');
     assert(scannerRes.statusCode === 200, 'GET /scanner returns 200 OK');
     assert(scannerRes.body.includes('Smart Scanner'), 'Scanner page title rendered');
-    assert(scannerRes.body.includes('Wet Waste (ଓଦା)') && scannerRes.body.includes('Dry Waste (ଶୁଖିଲା)'), 'Bilingual waste segregation guidance rendered');
+    assert(scannerRes.body.includes('Listen in Odia') || scannerRes.body.includes('ଓଡ଼ିଆରେ ଶୁଣନ୍ତୁ'), 'Bilingual waste segregation guidance rendered');
 
     console.log(`\n====================================================`);
     console.log(`🏁 Verification Results: ${passed} / ${total} Tests Passed`);

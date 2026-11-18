@@ -1,65 +1,605 @@
 <%- include('partials/header') %>
 
-<div class="max-w-md mx-auto space-y-6">
+<div class="max-w-2xl mx-auto space-y-6">
 
-  <!-- Scanner Card -->
-  <div class="bg-white rounded-2xl border border-surface-border p-6 shadow-sm text-center">
+  <!-- Scanner Header & BMC AI Mission Card -->
+  <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm">
+    <div class="flex items-start gap-3.5">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-civic-700 border border-emerald-100 flex items-center justify-center flex-shrink-0 shadow-xs">
+        <i data-lucide="scan" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight" data-i18n="scanner_heading">
+            AI Smart Waste Scanner
+          </h1>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+            Gemini 2.5 Flash
+          </span>
+        </div>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5" data-i18n="scanner_subheading">
+          Point camera or upload a waste photo for instant Gemini Vision classification & BMC 1929 grievance logging
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Camera / Upload Section -->
+  <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm">
     
-    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 text-civic-700 border border-emerald-100 mb-4 shadow-xs">
-      <i data-lucide="scan-line" class="w-8 h-8"></i>
-    </div>
-
-    <h1 class="text-xl font-bold tracking-tight text-slate-900" data-i18n="nav_scanner">
-      Smart Scanner
-    </h1>
-    <p class="text-xs sm:text-sm text-slate-500 mt-1">
-      BMC AI Computer Vision model identifies waste stream (Wet/Dry) and provides bilingual voice segregation guidance.
-    </p>
-
-    <!-- Camera Viewfinder Mockup (Anti-AI-slop, clean civic utility style) -->
-    <div class="mt-6 aspect-[4/3] bg-slate-100 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-6 relative overflow-hidden group">
-      <div class="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center text-slate-400 mb-3 group-hover:scale-105 transition-transform">
-        <i data-lucide="camera" class="w-6 h-6 text-civic-700"></i>
-      </div>
-      <p class="text-xs font-semibold text-slate-700">Point Camera at Waste Item</p>
-      <p class="text-[11px] text-slate-400 mt-1 max-w-xs">Supports kitchen organics, plastics, coconut shells, paper, and medical waste.</p>
+    <!-- Upload Dropzone / Camera Viewfinder -->
+    <div 
+      id="uploadDropzone" 
+      onclick="triggerFileInput()"
+      class="border-2 border-dashed border-slate-300 hover:border-civic-700 rounded-2xl p-6 text-center cursor-pointer bg-slate-50/70 hover:bg-emerald-50/40 transition-all duration-200 group relative">
       
-      <!-- Viewfinder corners -->
-      <div class="absolute top-4 left-4 w-5 h-5 border-t-2 border-l-2 border-civic-700"></div>
-      <div class="absolute top-4 right-4 w-5 h-5 border-t-2 border-r-2 border-civic-700"></div>
-      <div class="absolute bottom-4 left-4 w-5 h-5 border-b-2 border-l-2 border-civic-700"></div>
-      <div class="absolute bottom-4 right-4 w-5 h-5 border-b-2 border-r-2 border-civic-700"></div>
-    </div>
+      <input 
+        type="file" 
+        id="wasteImageInput" 
+        accept="image/*" 
+        capture="environment" 
+        class="hidden" 
+        onchange="handleImageSelected(event)">
 
-    <!-- Quick segregation tip pills -->
-    <div class="mt-6 grid grid-cols-2 gap-3 text-left">
-      <div class="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200">
-        <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
-          <i data-lucide="apple" class="w-3.5 h-3.5 text-emerald-700"></i>
-          <span>Wet Waste (ଓଦା)</span>
+      <!-- Empty State Inside Dropzone -->
+      <div id="dropzoneEmpty" class="py-4">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-white shadow-xs border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-civic-700 group-hover:scale-105 transition-all">
+          <i data-lucide="camera" class="w-7 h-7"></i>
         </div>
-        <p class="text-[11px] text-emerald-800 mt-0.5">Vegetables, peels, cooked food, flowers.</p>
+        <h3 class="mt-3 text-sm font-bold text-slate-800" data-i18n="upload_box_title">
+          Take Photo or Upload Waste Image
+        </h3>
+        <p class="text-xs text-slate-400 mt-1 max-w-xs mx-auto" data-i18n="upload_box_desc">
+          Tap anywhere to snap with camera or choose from gallery
+        </p>
       </div>
 
-      <div class="p-3 rounded-xl bg-blue-50/80 border border-blue-200">
-        <div class="flex items-center gap-1.5 text-xs font-bold text-blue-900">
-          <i data-lucide="box" class="w-3.5 h-3.5 text-blue-700"></i>
-          <span>Dry Waste (ଶୁଖିଲା)</span>
+      <!-- Selected Image Preview State -->
+      <div id="dropzonePreview" class="hidden">
+        <div class="relative inline-block max-w-full">
+          <img 
+            id="previewImg" 
+            src="" 
+            alt="Waste preview" 
+            class="max-h-64 rounded-xl mx-auto object-cover border border-slate-200 shadow-sm">
+          <button 
+            type="button" 
+            onclick="clearSelectedImage(event)" 
+            class="absolute top-2 right-2 p-1.5 rounded-full bg-slate-900/80 text-white hover:bg-slate-900 transition-colors shadow-md"
+            title="Remove photo">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
         </div>
-        <p class="text-[11px] text-blue-800 mt-0.5">Plastics, bottles, cardboard, metal cans.</p>
+        <div class="mt-3">
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-civic-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span data-i18n="change_photo_btn">Change Photo</span>
+          </span>
+        </div>
       </div>
+
+      <!-- Scanning Loading State -->
+      <div id="scanningLoader" class="hidden py-8">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-civic-50 text-civic-700 animate-spin mb-3">
+          <i data-lucide="loader-2" class="w-6 h-6"></i>
+        </div>
+        <p class="text-sm font-semibold text-slate-800" data-i18n="scanning_loader">
+          Analyzing waste with Gemini Vision...
+        </p>
+        <p class="text-xs text-slate-400 mt-1">Classifying biodegradation stream & municipal bin routing</p>
+      </div>
+
     </div>
 
-    <!-- City Map Quick Link -->
-    <div class="mt-6">
-      <a href="/map" class="touch-target w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm transition-all">
-        <i data-lucide="map-pin" class="w-4 h-4"></i>
-        <span>View Nearby Smart Bins on Map</span>
-      </a>
+    <!-- Scan Action Button (Enabled when image selected) -->
+    <div id="scanActionContainer" class="hidden mt-4">
+      <button 
+        type="button" 
+        id="analyzeBtn"
+        onclick="submitWasteScan()"
+        class="touch-target w-full flex items-center justify-center gap-2 bg-civic-700 hover:bg-civic-800 active:bg-civic-900 text-white font-bold text-sm sm:text-base rounded-xl shadow-md transition-all focus:outline-none focus:ring-4 focus:ring-emerald-200">
+        <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
+        <span data-i18n="scan_analyze_btn">Analyze Waste with BMC AI</span>
+      </button>
+    </div>
+
+    <!-- QUICK DEMO SAMPLE BUTTONS (Instant Testing for Demos & Evaluators) -->
+    <div class="mt-6 pt-5 border-t border-slate-100">
+      <div class="flex items-center justify-between mb-2.5">
+        <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-500 fill-amber-500"></i>
+          <span data-i18n="quick_samples_title">⚡ Quick Demo Samples (Instant 1-Click AI Test):</span>
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <!-- Sample 1: Wet Waste -->
+        <button 
+          type="button" 
+          onclick="runSampleScan('wet')" 
+          class="touch-target p-2.5 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 text-left transition-colors flex flex-col justify-between">
+          <span class="text-[11px] font-bold text-emerald-900 leading-snug" data-i18n="sample_wet_btn">🥗 Wet Waste (Peels)</span>
+          <span class="text-[9px] text-emerald-700 font-medium mt-1">Green Bin • +10 GC</span>
+        </button>
+
+        <!-- Sample 2: Overflowing Dustbin (1929 Ticket) -->
+        <button 
+          type="button" 
+          onclick="runSampleScan('overflowing')" 
+          class="touch-target p-2.5 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100 text-left transition-colors flex flex-col justify-between">
+          <span class="text-[11px] font-bold text-amber-900 leading-snug" data-i18n="sample_overflow_btn">🚨 Overflowing Bin</span>
+          <span class="text-[9px] text-amber-700 font-medium mt-1">1929 Ticket • +20 GC</span>
+        </button>
+
+        <!-- Sample 3: Temple Flowers (Nirmalya) -->
+        <button 
+          type="button" 
+          onclick="runSampleScan('temple')" 
+          class="touch-target p-2.5 rounded-xl border border-purple-200 bg-purple-50/60 hover:bg-purple-100 text-left transition-colors flex flex-col justify-between">
+          <span class="text-[11px] font-bold text-purple-900 leading-snug" data-i18n="sample_temple_btn">🌸 Temple Flowers</span>
+          <span class="text-[9px] text-purple-700 font-medium mt-1">Compost • +10 GC</span>
+        </button>
+
+        <!-- Sample 4: Dry Recyclable -->
+        <button 
+          type="button" 
+          onclick="runSampleScan('dry')" 
+          class="touch-target p-2.5 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100 text-left transition-colors flex flex-col justify-between">
+          <span class="text-[11px] font-bold text-blue-900 leading-snug" data-i18n="sample_dry_btn">🥤 Dry Recyclable</span>
+          <span class="text-[9px] text-blue-700 font-medium mt-1">Blue Bin • +10 GC</span>
+        </button>
+      </div>
     </div>
 
   </div>
 
+  <!-- RESULT CARD (Dynamically Populated after Gemini Scan) -->
+  <div id="resultCard" class="hidden space-y-4">
+
+    <!-- Green Credits Notification Banner -->
+    <div id="creditsAwardedBanner" class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-emerald-900 shadow-xs">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-civic-700 text-white flex items-center justify-center font-bold text-xs">
+          <i data-lucide="leaf" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h4 class="text-xs sm:text-sm font-bold" data-i18n="credits_awarded_label">Green Credits Awarded!</h4>
+          <p class="text-[11px] text-emerald-700 font-medium">Added to citizen Mo Khata balance</p>
+        </div>
+      </div>
+      <span id="creditsAmountBadge" class="text-sm sm:text-base font-extrabold text-civic-800 bg-white px-3 py-1 rounded-xl border border-emerald-200 shadow-2xs">
+        +10 GC
+      </span>
+    </div>
+
+    <!-- BMC 1929 Grievance Ticket Card (Shown if isOverflowing === true) -->
+    <div id="overflowTicketCard" class="hidden p-5 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-terracotta-600 rounded-2xl shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-terracotta-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <h3 class="text-sm sm:text-base font-bold text-slate-900" data-i18n="official_ticket_badge">
+              Official BMC 1929 Grievance Ticket Logged
+            </h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 border border-amber-300">
+              DISPATCHED
+            </span>
+          </div>
+          <p class="text-xs text-slate-600 mt-1" data-i18n="ticket_desc_text">
+            High priority sanitation truck dispatch alert transmitted to BMC Sanitation Control Room.
+          </p>
+
+          <div class="mt-3.5 p-3 bg-white rounded-xl border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" data-i18n="ticket_id_label">Grievance Ticket ID</span>
+              <p id="ticketIdText" class="text-base font-mono font-extrabold text-terracotta-700">BMC-SWM-2026-8491</p>
+            </div>
+            <div class="text-left sm:text-right text-xs text-slate-500">
+              <span>Jurisdiction: <strong><%= user ? user.ward : 'Ward 1 - Patia' %></strong></span>
+              <br><span class="text-[11px] text-emerald-700 font-semibold">Toll-free Hotline: 1929</span>
+            </div>
+          </div>
+
+          <!-- Drain Clog Risk Warning -->
+          <div id="drainRiskWarning" class="hidden mt-3 p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-rose-600 flex-shrink-0"></i>
+            <span data-i18n="drain_risk_badge">⚠️ Monsoon Flood Hazard: Plastic waste located near drainage channel. Flagged for priority desilting.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Classification & Audio Guidance Card -->
+    <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm space-y-4">
+      
+      <!-- Top Badges: Category, Bin Color, Confidence -->
+      <div class="flex items-center justify-between flex-wrap gap-2 pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <span id="wasteCategoryBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            Wet (Biodegradable)
+          </span>
+          <span id="binColorBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-700 text-white flex items-center gap-1 shadow-2xs">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span id="binColorText">Green Bin</span>
+          </span>
+        </div>
+
+        <div class="text-xs text-slate-400 font-medium">
+          <span data-i18n="confidence_metric">AI Confidence</span>: <strong id="confidenceText" class="text-slate-700">96%</strong>
+        </div>
+      </div>
+
+      <!-- Written Guidance in Odia and English -->
+      <div class="space-y-3">
+        <!-- Odia Instruction (High Contrast & Noto Sans Oriya) -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
+            <span class="font-odia">ଓଡ଼ିଆ ନିର୍ଦ୍ଦେଶନାମା (Odia Guidance)</span>
+            <span class="text-[10px] text-slate-400">ସ୍ୱଚ୍ଛ ଭୁବନେଶ୍ୱର</span>
+          </div>
+          <p id="instructionOrText" class="text-sm sm:text-base font-semibold text-slate-900 font-odia leading-relaxed">
+            ବିଏମସି ମୋ ଖାତା ଜୈବିକ ଖତ ତିଆରି ପାଇଁ ପନିପରିବା ଚୋପା ଏବଂ ଖାଦ୍ୟ ବର୍ଜ୍ୟବସ୍ତୁକୁ ସବୁଜ ଡଷ୍ଟବିନରେ ପକାନ୍ତୁ।
+          </p>
+        </div>
+
+        <!-- English Instruction -->
+        <div class="p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-600">
+          <span class="font-semibold text-slate-800 block mb-0.5">English Instruction:</span>
+          <p id="instructionEnText" class="leading-relaxed">
+            Dispose kitchen scraps and vegetable peels into the Green Bin for BMC Mo Khata organic compost processing.
+          </p>
+        </div>
+      </div>
+
+      <!-- PROMINENT AUDIO BUTTON: "🔊 Listen in Odia / ଓଡ଼ିଆରେ ଶୁଣନ୍ତୁ" -->
+      <div class="pt-2">
+        <button 
+          type="button" 
+          id="listenAudioBtn" 
+          onclick="toggleOdiaVoiceGuidance()" 
+          class="touch-target w-full flex items-center justify-center gap-2.5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white font-bold text-sm sm:text-base rounded-xl shadow-md transition-all focus:outline-none focus:ring-4 focus:ring-emerald-200">
+          <i data-lucide="volume-2" class="w-5 h-5 text-amber-300"></i>
+          <span id="audioBtnText" data-i18n="listen_odia_btn">🔊 Listen in Odia / ଓଡ଼ିଆରେ ଶୁଣନ୍ତୁ</span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RECENT SCANS & 1929 TICKETS HISTORY LIST -->
+  <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="history" class="w-4 h-4 text-civic-700"></i>
+        <span data-i18n="recent_history_title">Recent Scans & 1929 Tickets</span>
+      </h3>
+      <span class="text-xs text-slate-400 font-medium">Ward: <%= user ? user.ward : 'Ward 1 - Patia' %></span>
+    </div>
+
+    <div id="recentScansContainer" class="space-y-2.5">
+      <% if (typeof reports !== 'undefined' && reports && reports.length > 0) { %>
+        <% reports.forEach(r => { %>
+          <div class="p-3.5 rounded-xl border border-surface-border hover:border-slate-300 bg-slate-50/50 hover:bg-white transition-all flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl <%= r.binColor === 'Green Bin' ? 'bg-emerald-100 text-emerald-800' : (r.binColor === 'Blue Bin' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800') %> flex items-center justify-center flex-shrink-0 font-bold text-xs border border-slate-200">
+                <i data-lucide="<%= r.isOverflowing ? 'alert-triangle' : 'recycle' %>" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-xs sm:text-sm text-slate-900"><%= r.wasteCategory %></span>
+                  <% if (r.ticketId) { %>
+                    <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                      <%= r.ticketId %>
+                    </span>
+                  <% } %>
+                </div>
+                <p class="text-xs text-slate-500 font-odia mt-0.5 line-clamp-1"><%= r.aiInstructionOr %></p>
+              </div>
+            </div>
+
+            <div class="text-right flex-shrink-0">
+              <span class="text-xs font-bold text-civic-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                +<%= r.creditsEarned %> GC
+              </span>
+              <span class="block text-[10px] text-slate-400 mt-1">
+                <%= new Date(r.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+              </span>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div id="noHistoryPlaceholder" class="text-center py-8 text-xs text-slate-400">
+          <i data-lucide="inbox" class="w-8 h-8 mx-auto text-slate-300 mb-2"></i>
+          <p data-i18n="no_history_text">No waste scans yet. Snap your first waste photo above!</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
 </div>
+
+<!-- Client-side Interactive Logic (Image Upload, Gemini AI Request, TTS Audio, & AutoVoice) -->
+<script>
+  let selectedFile = null;
+  let activeAudioGuidance = null;
+  let isSpeaking = false;
+  const userAutoVoiceSetting = <%= user && user.settings && user.settings.autoVoice ? 'true' : 'false' %>;
+
+  function triggerFileInput() {
+    if (!selectedFile) {
+      document.getElementById('wasteImageInput').click();
+    }
+  }
+
+  function handleImageSelected(e) {
+    const file = e.target.files[0];
+    if (file) {
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('previewImg').src = evt.target.result;
+        document.getElementById('dropzoneEmpty').classList.add('hidden');
+        document.getElementById('dropzonePreview').classList.remove('hidden');
+        document.getElementById('scanActionContainer').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function clearSelectedImage(e) {
+    if (e) e.stopPropagation();
+    selectedFile = null;
+    document.getElementById('wasteImageInput').value = '';
+    document.getElementById('previewImg').src = '';
+    document.getElementById('dropzonePreview').classList.add('hidden');
+    document.getElementById('dropzoneEmpty').classList.remove('hidden');
+    document.getElementById('scanActionContainer').classList.add('hidden');
+  }
+
+  // Trigger scan with file
+  async function submitWasteScan() {
+    if (!selectedFile) return;
+    const formData = new FormData();
+    formData.append('wasteImage', selectedFile);
+    await executeScanRequest(formData);
+  }
+
+  // Trigger quick demo sample scan
+  async function runSampleScan(sampleType) {
+    const formData = new FormData();
+    formData.append('sampleType', sampleType);
+    await executeScanRequest(formData);
+  }
+
+  // Core scan execution
+  async function executeScanRequest(formData) {
+    const loader = document.getElementById('scanningLoader');
+    const emptyState = document.getElementById('dropzoneEmpty');
+    const previewState = document.getElementById('dropzonePreview');
+    const actionContainer = document.getElementById('scanActionContainer');
+    const resultCard = document.getElementById('resultCard');
+
+    emptyState.classList.add('hidden');
+    previewState.classList.add('hidden');
+    actionContainer.classList.add('hidden');
+    loader.classList.remove('hidden');
+    resultCard.classList.add('hidden');
+
+    try {
+      const response = await fetch('/api/scan', {
+        method: 'POST',
+        body: formData
+      });
+
+      const res = await response.json();
+      if (res.success && res.data) {
+        renderScanResult(res.data);
+      } else {
+        alert(res.error || 'Failed to analyze waste image.');
+      }
+    } catch (err) {
+      console.error('Scan request error:', err);
+      alert('Error communicating with BMC AI scanner service.');
+    } finally {
+      loader.classList.add('hidden');
+      if (selectedFile) {
+        previewState.classList.remove('hidden');
+        actionContainer.classList.remove('hidden');
+      } else {
+        emptyState.classList.remove('hidden');
+      }
+      lucide.createIcons();
+    }
+  }
+
+  // Render Result in UI
+  function renderScanResult(data) {
+    const resultCard = document.getElementById('resultCard');
+    resultCard.classList.remove('hidden');
+
+    // Update Header Green Credits badge
+    const headerCredits = document.getElementById('headerCreditsCount');
+    if (headerCredits && data.newGreenCredits) {
+      headerCredits.textContent = data.newGreenCredits;
+    }
+
+    // Credits badge in result
+    document.getElementById('creditsAmountBadge').textContent = `+${data.creditsEarned} GC`;
+
+    // Category & Bin Color badges
+    const categoryBadge = document.getElementById('wasteCategoryBadge');
+    categoryBadge.textContent = data.wasteCategory;
+
+    const binBadge = document.getElementById('binColorBadge');
+    const binText = document.getElementById('binColorText');
+    binText.textContent = data.binColor;
+
+    if (data.binColor === 'Green Bin' || data.binColor === 'Temple Compost') {
+      binBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-700 text-white flex items-center gap-1 shadow-2xs";
+      categoryBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200";
+    } else if (data.binColor === 'Blue Bin') {
+      binBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-blue-700 text-white flex items-center gap-1 shadow-2xs";
+      categoryBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200";
+    } else {
+      binBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-rose-700 text-white flex items-center gap-1 shadow-2xs";
+      categoryBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200";
+    }
+
+    // Confidence
+    document.getElementById('confidenceText').textContent = data.confidence || '96%';
+
+    // Instructions
+    document.getElementById('instructionOrText').textContent = data.instructionOr;
+    document.getElementById('instructionEnText').textContent = data.instructionEn;
+
+    // Cache guidance text for Audio Readout
+    activeAudioGuidance = data.instructionOr || data.instructionEn;
+
+    // Overflow & 1929 Ticket Card
+    const ticketCard = document.getElementById('overflowTicketCard');
+    if (data.isOverflowing && data.ticketId) {
+      ticketCard.classList.remove('hidden');
+      document.getElementById('ticketIdText').textContent = data.ticketId;
+    } else {
+      ticketCard.classList.add('hidden');
+    }
+
+    // Drain Risk
+    const drainWarning = document.getElementById('drainRiskWarning');
+    if (data.drainClogRisk) {
+      drainWarning.classList.remove('hidden');
+    } else {
+      drainWarning.classList.add('hidden');
+    }
+
+    // Prepend to history container
+    prependHistoryItem(data);
+
+    // Scroll cleanly to result
+    resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Check Auto-Voice Setting from Stage 1!
+    if (userAutoVoiceSetting) {
+      playOdiaAudio(activeAudioGuidance);
+    }
+  }
+
+  // Prepend new scan to history list
+  function prependHistoryItem(data) {
+    const container = document.getElementById('recentScansContainer');
+    const placeholder = document.getElementById('noHistoryPlaceholder');
+    if (placeholder) placeholder.remove();
+
+    const item = document.createElement('div');
+    item.className = "p-3.5 rounded-xl border border-surface-border bg-emerald-50/30 hover:bg-white transition-all flex items-center justify-between gap-3 animate-fade-in";
+    
+    const iconName = data.isOverflowing ? 'alert-triangle' : 'recycle';
+    const bgClass = data.binColor === 'Green Bin' ? 'bg-emerald-100 text-emerald-800' : (data.binColor === 'Blue Bin' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800');
+
+    item.innerHTML = `
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl ${bgClass} flex items-center justify-center flex-shrink-0 font-bold text-xs border border-slate-200">
+          <i data-lucide="${iconName}" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-xs sm:text-sm text-slate-900">${data.wasteCategory}</span>
+            ${data.ticketId ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-100 text-amber-900 border border-amber-200">${data.ticketId}</span>` : ''}
+          </div>
+          <p class="text-xs text-slate-500 font-odia mt-0.5 line-clamp-1">${data.instructionOr}</p>
+        </div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        <span class="text-xs font-bold text-civic-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+          +${data.creditsEarned} GC
+        </span>
+        <span class="block text-[10px] text-slate-400 mt-1">Just now</span>
+      </div>
+    `;
+
+    container.insertBefore(item, container.firstChild);
+    lucide.createIcons();
+  }
+
+  // Spoken Odia Voice Readout using Web SpeechSynthesis
+  function toggleOdiaVoiceGuidance() {
+    if (isSpeaking) {
+      stopAudio();
+    } else {
+      if (activeAudioGuidance) {
+        playOdiaAudio(activeAudioGuidance);
+      }
+    }
+  }
+
+  function playOdiaAudio(textToSpeak) {
+    if (!('speechSynthesis' in window)) {
+      alert('Speech synthesis not supported in this browser.');
+      return;
+    }
+
+    window.speechSynthesis.cancel(); // Cancel any existing audio
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // Attempt to locate an Indian / Odia voice if installed
+    const voices = window.speechSynthesis.getVoices();
+    let odiaVoice = voices.find(v => v.lang.startsWith('or') || v.lang === 'or-IN');
+    if (!odiaVoice) {
+      // Fallback to Indian English or Hindi for natural cadence
+      odiaVoice = voices.find(v => v.lang.startsWith('hi') || v.lang === 'en-IN');
+    }
+    if (odiaVoice) {
+      utterance.voice = odiaVoice;
+    }
+
+    utterance.rate = 0.95; // Clear civic speaking rate
+    utterance.pitch = 1.0;
+
+    const btnText = document.getElementById('audioBtnText');
+
+    utterance.onstart = function() {
+      isSpeaking = true;
+      if (btnText) {
+        btnText.textContent = (currentLanguage === 'or') 
+          ? "🔊 ଓଡ଼ିଆରେ ଶୁଣାଯାଉଛି... (ବନ୍ଦ କରିବାକୁ ଟ୍ୟାପ୍ କରନ୍ତୁ)" 
+          : "🔊 Speaking Odia guidance... (Tap to Stop)";
+      }
+    };
+
+    utterance.onend = function() {
+      stopAudio();
+    };
+
+    utterance.onerror = function() {
+      stopAudio();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function stopAudio() {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    isSpeaking = false;
+    const btnText = document.getElementById('audioBtnText');
+    if (btnText) {
+      btnText.textContent = (currentLanguage === 'or') 
+        ? "🔊 ଓଡ଼ିଆରେ ଶୁଣନ୍ତୁ" 
+        : "🔊 Listen in Odia / ଓଡ଼ିଆରେ ଶୁଣନ୍ତୁ";
+    }
+  }
+
+  // Pre-load speech voices for smooth mobile playback
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.getVoices();
+    };
+  }
+</script>
 
 <%- include('partials/footer') %>

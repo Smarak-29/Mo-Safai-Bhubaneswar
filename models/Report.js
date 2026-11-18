@@ -3,28 +3,60 @@ const mongoose = require('mongoose');
 const ReportSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    required: true
   },
   ticketId: {
+    type: String,
+    sparse: true,
+    index: true
+  },
+  scanId: {
     type: String,
     required: true,
     unique: true
   },
   wardName: {
-    type: String
+    type: String,
+    default: 'Ward 1 - Patia'
   },
   wasteCategory: {
-    type: String
+    type: String,
+    enum: [
+      'Wet (Biodegradable)',
+      'Dry (Recyclable)',
+      'Hazardous / E-Waste',
+      'Temple Floral Waste'
+    ],
+    required: true
   },
-  aiInstructionEn: {
-    type: String
-  },
-  aiInstructionOr: {
-    type: String
+  binColor: {
+    type: String,
+    enum: ['Green Bin', 'Blue Bin', 'Red/Hazardous Bin', 'Temple Compost'],
+    default: 'Green Bin'
   },
   isOverflowing: {
     type: Boolean,
     default: false
+  },
+  drainClogRisk: {
+    type: Boolean,
+    default: false
+  },
+  aiInstructionEn: {
+    type: String,
+    required: true
+  },
+  aiInstructionOr: {
+    type: String,
+    required: true
+  },
+  confidence: {
+    type: String,
+    default: '95%'
+  },
+  imageUrl: {
+    type: String
   },
   creditsEarned: {
     type: Number,

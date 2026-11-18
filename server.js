@@ -1,4 +1,5 @@
-require('dotenv').config();
+require('dotenv').config({ override: true });
+try { require('dns').setDefaultResultOrder('ipv4first'); } catch (e) {}
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
@@ -6,6 +7,7 @@ const connectDB = require('./config/db');
 const { startIoTSimulator } = require('./utils/iotSimulator');
 const { router: authRoutes } = require('./routes/authRoutes');
 const apiRoutes = require('./routes/apiRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -42,6 +44,7 @@ app.use((req, res, next) => {
 // Mount Routes
 app.use('/', authRoutes);
 app.use('/', apiRoutes);
+app.use('/', aiRoutes);
 
 const startServer = async () => {
   try {
