@@ -1,0 +1,146 @@
+<%- include('partials/header') %>
+
+<div class="max-w-md mx-auto my-4 sm:my-8">
+
+  <!-- Registration Card -->
+  <div class="bg-white rounded-2xl border border-surface-border p-6 sm:p-8 shadow-sm">
+    
+    <!-- Title & Icon -->
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 text-civic-700 border border-emerald-100 mb-3 shadow-xs">
+        <i data-lucide="user-plus" class="w-7 h-7"></i>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900" data-i18n="register_title">Citizen Registration</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1" data-i18n="register_desc">Join Bhubaneswar's clean city mission and earn civic rewards</p>
+    </div>
+
+    <!-- Error Banner -->
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-800 text-xs sm:text-sm">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5"></i>
+        <span><%= error %></span>
+      </div>
+    <% } %>
+
+    <!-- One-Click Demo Shortcut -->
+    <div class="mb-6">
+      <a 
+        href="/auth/demo-login" 
+        class="w-full touch-target flex flex-col items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-700 to-civic-700 hover:from-emerald-800 hover:to-civic-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 group text-center focus:outline-none focus:ring-4 focus:ring-emerald-200">
+        <div class="flex items-center gap-2 font-bold text-sm sm:text-base">
+          <i data-lucide="zap" class="w-4 h-4 text-amber-300 fill-amber-300 group-hover:scale-110 transition-transform"></i>
+          <span data-i18n="demo_btn">⚡ One-Click Demo Citizen Login</span>
+        </div>
+        <span class="text-[11px] text-emerald-100 mt-0.5" data-i18n="demo_subtext">Instant access as Smarak (Ward 1 - Patia, 120 Green Credits)</span>
+      </a>
+    </div>
+
+    <div class="relative flex items-center justify-center my-6">
+      <div class="border-t border-slate-200 w-full"></div>
+      <span class="bg-white px-3 text-xs text-slate-400 font-medium uppercase tracking-wider">or register as new citizen</span>
+    </div>
+
+    <!-- Registration Form -->
+    <form action="/register" method="POST" class="space-y-4">
+      
+      <!-- Full Name -->
+      <div>
+        <label for="name" class="block text-xs font-semibold text-slate-700 mb-1.5" data-i18n="name_label">Full Name</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="user" class="w-4 h-4"></i>
+          </span>
+          <input 
+            type="text" 
+            id="name" 
+            name="name" 
+            required 
+            placeholder="e.g. Smarak Mohapatra"
+            data-i18n-placeholder="name_placeholder"
+            class="touch-target w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-surface-border rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-civic-700 focus:border-transparent transition-all">
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-xs font-semibold text-slate-700 mb-1.5" data-i18n="email_label">Email Address</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+          </span>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required 
+            placeholder="citizen@bhubaneswar.gov.in"
+            data-i18n-placeholder="email_placeholder"
+            class="touch-target w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-surface-border rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-civic-700 focus:border-transparent transition-all">
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-xs font-semibold text-slate-700 mb-1.5" data-i18n="password_label">Password</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </span>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            required 
+            placeholder="Create a strong password"
+            data-i18n-placeholder="password_placeholder"
+            class="touch-target w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-surface-border rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-civic-700 focus:border-transparent transition-all">
+        </div>
+      </div>
+
+      <!-- Ward Selector -->
+      <div>
+        <label for="ward" class="block text-xs font-semibold text-slate-700 mb-1.5" data-i18n="ward_select_label">Select Your BMC Ward</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+          </span>
+          <select 
+            id="ward" 
+            name="ward" 
+            class="touch-target w-full pl-10 pr-8 py-2.5 bg-slate-50 border border-surface-border rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-civic-700 focus:border-transparent transition-all appearance-none">
+            <option value="Ward 1 - Patia" data-i18n="ward_1">Ward 1 - Patia</option>
+            <option value="Ward 26 - Jaydev Vihar" data-i18n="ward_26">Ward 26 - Jaydev Vihar</option>
+            <option value="Ward 27 - Saheed Nagar" data-i18n="ward_27">Ward 27 - Saheed Nagar</option>
+            <option value="Ward 39 - Old Town / Lingaraj" data-i18n="ward_39">Ward 39 - Old Town / Lingaraj</option>
+            <option value="Ward 47 - Bapuji Nagar" data-i18n="ward_47">Ward 47 - Bapuji Nagar</option>
+            <option value="Ward 49 - Khandagiri" data-i18n="ward_49">Ward 49 - Khandagiri</option>
+          </select>
+          <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          </span>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="touch-target w-full mt-2 flex items-center justify-center gap-2 bg-civic-700 hover:bg-civic-800 text-white font-semibold text-sm rounded-xl shadow-sm transition-all focus:outline-none focus:ring-4 focus:ring-emerald-200">
+        <span data-i18n="create_account_btn">Complete Registration</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+
+    </form>
+
+    <!-- Footer Switcher -->
+    <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+      <p class="text-xs text-slate-500">
+        <span data-i18n="already_account">Already registered?</span>
+        <a href="/login" class="font-semibold text-civic-700 hover:text-civic-800 hover:underline ml-1" data-i18n="sign_in_link">Sign In here</a>
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>

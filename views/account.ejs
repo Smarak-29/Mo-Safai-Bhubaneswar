@@ -1,0 +1,321 @@
+<%- include('partials/header') %>
+
+<div class="max-w-2xl mx-auto space-y-6">
+
+  <!-- Toast Notification (Hidden by default or shown on ?saved=true) -->
+  <div 
+    id="toastNotification" 
+    class="<%= typeof saved !== 'undefined' && saved ? 'flex' : 'hidden' %> fixed top-20 right-4 sm:right-8 z-50 items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-700 transition-all duration-300">
+    <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+      <i data-lucide="check" class="w-4 h-4"></i>
+    </div>
+    <span class="text-xs sm:text-sm font-medium" data-i18n="save_success_toast">Preferences saved successfully to BMC records!</span>
+    <button type="button" onclick="dismissToast()" class="text-slate-400 hover:text-white p-1">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+
+  <!-- Profile Summary Card -->
+  <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <!-- Initials Avatar -->
+        <div class="w-14 h-14 rounded-2xl bg-civic-700 text-white font-bold text-xl flex items-center justify-center shadow-sm border border-civic-800 flex-shrink-0">
+          <%= user.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'SC' %>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg sm:text-xl font-bold text-slate-900"><%= user.name %></h1>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-civic-700 border border-emerald-200">
+              <i data-lucide="check-circle" class="w-3 h-3 text-civic-700"></i>
+              <span data-i18n="verified_badge">Verified BMC Citizen</span>
+            </span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5"><%= user.email %></p>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="inline-flex items-center gap-1 text-xs text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-medium">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span id="displayWard"><%= user.ward || 'Ward 1 - Patia' %></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sign Out Link -->
+      <div class="sm:self-start">
+        <a href="/logout" class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg border border-rose-200 transition-colors">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span data-i18n="nav_logout">Sign Out</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Green Credits Hero Card (Mo Khata Branding) -->
+  <div class="bg-gradient-to-br from-emerald-900 via-civic-800 to-emerald-950 text-white rounded-2xl p-5 sm:p-6 shadow-md relative overflow-hidden">
+    <!-- Subtle civic watermarking background icon -->
+    <div class="absolute -right-6 -bottom-6 text-white/5 pointer-events-none">
+      <i data-lucide="recycle" class="w-48 h-48"></i>
+    </div>
+
+    <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 text-emerald-300 text-xs font-semibold tracking-wider uppercase">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+          <span data-i18n="current_credits">Green Credits Balance</span>
+        </div>
+        <div class="flex items-baseline gap-2 mt-1">
+          <span id="creditsHeroCount" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white"><%= user.greenCredits %></span>
+          <span class="text-emerald-200 text-sm font-medium" data-i18n="credits_unit">Credits</span>
+        </div>
+        <p class="text-xs text-emerald-100/80 mt-1 max-w-sm" data-i18n="credits_earned_info">
+          Earned via segregated waste disposal & timely civic reporting
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:items-end justify-center">
+        <div class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 text-white px-3 py-1.5 rounded-full text-xs font-semibold">
+          <i data-lucide="award" class="w-3.5 h-3.5 text-amber-300"></i>
+          <span data-i18n="tier_badge">Mo Khata Citizen Tier 1</span>
+        </div>
+        <span class="text-[10px] text-emerald-200/70 mt-1.5">Redeemable for BMC water/holding rebate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Preferences Card -->
+  <div class="bg-white rounded-2xl border border-surface-border p-6 shadow-sm">
+    <div class="border-b border-surface-border pb-4 mb-5">
+      <h2 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+        <i data-lucide="settings" class="w-5 h-5 text-civic-700"></i>
+        <span data-i18n="settings_heading">Application Preferences</span>
+      </h2>
+      <p class="text-xs text-slate-500 mt-0.5" data-i18n="account_desc">Manage your civic profile, residential ward, and AI voice assistance</p>
+    </div>
+
+    <form id="settingsForm" action="/account/settings" method="POST" class="space-y-6">
+      
+      <!-- Assigned BMC Ward Dropdown -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="wardSelect" class="block text-xs sm:text-sm font-semibold text-slate-800" data-i18n="pref_ward_label">Assigned BMC Ward</label>
+        </div>
+        <p class="text-xs text-slate-500 mb-2" data-i18n="pref_ward_desc">Prioritizes your local sanitation alerts and nearby smart bins</p>
+        
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+          </span>
+          <select 
+            id="wardSelect" 
+            name="ward" 
+            class="touch-target w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-surface-border rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-civic-700 focus:border-transparent transition-all appearance-none font-medium">
+            <option value="Ward 1 - Patia" <%= user.ward === 'Ward 1 - Patia' ? 'selected' : '' %> data-i18n="ward_1">Ward 1 - Patia</option>
+            <option value="Ward 26 - Jaydev Vihar" <%= user.ward === 'Ward 26 - Jaydev Vihar' ? 'selected' : '' %> data-i18n="ward_26">Ward 26 - Jaydev Vihar</option>
+            <option value="Ward 27 - Saheed Nagar" <%= user.ward === 'Ward 27 - Saheed Nagar' ? 'selected' : '' %> data-i18n="ward_27">Ward 27 - Saheed Nagar</option>
+            <option value="Ward 39 - Old Town / Lingaraj" <%= user.ward === 'Ward 39 - Old Town / Lingaraj' ? 'selected' : '' %> data-i18n="ward_39">Ward 39 - Old Town / Lingaraj</option>
+            <option value="Ward 47 - Bapuji Nagar" <%= user.ward === 'Ward 47 - Bapuji Nagar' ? 'selected' : '' %> data-i18n="ward_47">Ward 47 - Bapuji Nagar</option>
+            <option value="Ward 49 - Khandagiri" <%= user.ward === 'Ward 49 - Khandagiri' ? 'selected' : '' %> data-i18n="ward_49">Ward 49 - Khandagiri</option>
+          </select>
+          <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-slate-400">
+            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+          </span>
+        </div>
+      </div>
+
+      <!-- Default Language Selector -->
+      <div>
+        <label class="block text-xs sm:text-sm font-semibold text-slate-800 mb-1" data-i18n="pref_lang_label">Default Language</label>
+        <p class="text-xs text-slate-500 mb-3" data-i18n="pref_lang_desc">Choose between English and Odia for all interfaces and AI guidance</p>
+        
+        <div class="grid grid-cols-2 gap-3">
+          <!-- English Option -->
+          <label class="relative flex items-center justify-between p-3.5 rounded-xl border border-surface-border bg-slate-50 cursor-pointer hover:bg-slate-100/80 transition-all has-[:checked]:bg-emerald-50 has-[:checked]:border-civic-700 has-[:checked]:ring-1 has-[:checked]:ring-civic-700">
+            <div class="flex items-center gap-2.5">
+              <input 
+                type="radio" 
+                id="langEn" 
+                name="language" 
+                value="en" 
+                <%= !user.settings || user.settings.language === 'en' ? 'checked' : '' %> 
+                class="w-4 h-4 text-civic-700 focus:ring-civic-700">
+              <span class="text-sm font-semibold text-slate-900">English</span>
+            </div>
+            <span class="text-xs text-slate-400 font-medium">Standard</span>
+          </label>
+
+          <!-- Odia Option -->
+          <label class="relative flex items-center justify-between p-3.5 rounded-xl border border-surface-border bg-slate-50 cursor-pointer hover:bg-slate-100/80 transition-all has-[:checked]:bg-emerald-50 has-[:checked]:border-civic-700 has-[:checked]:ring-1 has-[:checked]:ring-civic-700">
+            <div class="flex items-center gap-2.5">
+              <input 
+                type="radio" 
+                id="langOr" 
+                name="language" 
+                value="or" 
+                <%= user.settings && user.settings.language === 'or' ? 'checked' : '' %> 
+                class="w-4 h-4 text-civic-700 focus:ring-civic-700">
+              <span class="text-sm font-semibold text-slate-900 font-odia">ଓଡ଼ିଆ</span>
+            </div>
+            <span class="text-xs text-slate-400 font-medium">ସ୍ଥାନୀୟ</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Auto-Voice Readout Toggle -->
+      <div class="pt-2 border-t border-slate-100">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <i data-lucide="volume-2" class="w-4 h-4 text-civic-700"></i>
+              <label for="autoVoiceToggle" class="text-xs sm:text-sm font-semibold text-slate-800 cursor-pointer" data-i18n="pref_voice_label">
+                Auto-Voice Readout
+              </label>
+            </div>
+            <p class="text-xs text-slate-500 mt-1" data-i18n="pref_voice_desc">
+              Automatically read waste segregation instructions aloud when scanned
+            </p>
+            <p id="voiceStatusText" class="text-[11px] font-medium mt-1 text-slate-600">
+              <%= user.settings && user.settings.autoVoice ? 'Active (Voice speaks segregation instructions)' : 'Muted (Silent on-screen display only)' %>
+            </p>
+          </div>
+
+          <!-- iOS/Modern Civic Switch -->
+          <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+            <input 
+              type="checkbox" 
+              id="autoVoiceToggle" 
+              name="autoVoice" 
+              value="true" 
+              <%= user.settings && user.settings.autoVoice ? 'checked' : '' %> 
+              class="sr-only peer"
+              onchange="toggleVoiceStatus(this.checked)">
+            <div class="w-12 h-7 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[3px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-civic-700"></div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Save Button with Generous Touch Target -->
+      <div class="pt-4">
+        <button 
+          type="submit" 
+          id="saveSettingsBtn"
+          class="touch-target w-full flex items-center justify-center gap-2 bg-civic-700 hover:bg-civic-800 active:bg-civic-900 text-white font-semibold text-sm sm:text-base rounded-xl shadow-sm hover:shadow-md transition-all focus:outline-none focus:ring-4 focus:ring-emerald-200">
+          <i data-lucide="save" class="w-4 h-4"></i>
+          <span id="saveBtnText" data-i18n="save_changes_btn">Save Preferences</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<!-- Interactive Client-side Script for Instant Persistence & Toast -->
+<script>
+  function toggleVoiceStatus(isChecked) {
+    const statusText = document.getElementById('voiceStatusText');
+    const lang = currentLanguage || 'en';
+    if (isChecked) {
+      statusText.textContent = translations[lang].voice_enabled_status || 'Active (Voice speaks segregation instructions)';
+      statusText.className = "text-[11px] font-medium mt-1 text-civic-700";
+    } else {
+      statusText.textContent = translations[lang].voice_disabled_status || 'Muted (Silent on-screen display only)';
+      statusText.className = "text-[11px] font-medium mt-1 text-slate-500";
+    }
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    if (toast) {
+      if (message) {
+        toast.querySelector('span').textContent = message;
+      }
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      setTimeout(() => {
+        dismissToast();
+      }, 3500);
+    }
+  }
+
+  function dismissToast() {
+    const toast = document.getElementById('toastNotification');
+    if (toast) {
+      toast.classList.add('hidden');
+      toast.classList.remove('flex');
+    }
+  }
+
+  // Handle Radio Language Change to update page instantly
+  document.querySelectorAll('input[name="language"]').forEach((radio) => {
+    radio.addEventListener('change', (e) => {
+      if (e.target.checked) {
+        switchLanguage(e.target.value);
+        toggleVoiceStatus(document.getElementById('autoVoiceToggle').checked);
+      }
+    });
+  });
+
+  // AJAX Form Handler for seamless persistence with toast
+  document.getElementById('settingsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('saveSettingsBtn');
+    const btnText = document.getElementById('saveBtnText');
+    const originalText = btnText.textContent;
+    
+    btn.disabled = true;
+    btn.classList.add('opacity-75');
+    btnText.textContent = (currentLanguage === 'or') ? "ସଂରକ୍ଷିତ ହେଉଛି..." : "Saving...";
+
+    const formData = new FormData(this);
+    const payload = {
+      ward: formData.get('ward'),
+      language: formData.get('language'),
+      autoVoice: formData.get('autoVoice') === 'true' || formData.get('autoVoice') === 'on'
+    };
+
+    try {
+      const response = await fetch('/account/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Update display ward
+        document.getElementById('displayWard').textContent = payload.ward;
+        // Trigger toast
+        const msg = (currentLanguage === 'or') 
+          ? "ଆପଣଙ୍କ ପସନ୍ଦ ବିଏମସି ରେକର୍ଡରେ ସଫଳତାର ସହ ସଂରକ୍ଷିତ ହେଲା!" 
+          : "Preferences saved successfully to BMC records!";
+        showToast(msg);
+      } else {
+        alert(data.error || 'Failed to save settings.');
+      }
+    } catch (err) {
+      console.error('Save error:', err);
+      // Fallback: standard submit if network issue
+      this.submit();
+    } finally {
+      btn.disabled = false;
+      btn.classList.remove('opacity-75');
+      btnText.textContent = originalText;
+    }
+  });
+
+  // Auto-dismiss initial flash toast if loaded with ?saved=true
+  document.addEventListener('DOMContentLoaded', () => {
+    const toast = document.getElementById('toastNotification');
+    if (toast && !toast.classList.contains('hidden')) {
+      setTimeout(() => {
+        dismissToast();
+      }, 3500);
+    }
+  });
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,64 @@
+  </main>
+
+  <!-- Desktop Footer -->
+  <footer class="hidden md:block border-t border-surface-border bg-white mt-auto py-6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-slate-700">ଭୁବନେଶ୍ୱର ମହାନଗର ନିଗମ</span>
+        <span>•</span>
+        <span>Bhubaneswar Municipal Corporation (BMC)</span>
+        <span>•</span>
+        <span class="text-emerald-700 font-medium">Swachh Survekshan 2026 Initiative</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Toll-Free Helpline: <strong>1929</strong></span>
+        <span>•</span>
+        <span>Citizen Portal v1.2</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky Mobile Bottom Navigation Bar (Scanner, City Map, Account) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-surface-border shadow-[0_-4px_12px_rgba(15,23,42,0.06)]" aria-label="Mobile Navigation">
+    <div class="grid grid-cols-3 h-16 max-w-md mx-auto px-2">
+      
+      <!-- Smart Scanner Tab -->
+      <a href="/scanner" class="touch-target flex flex-col items-center justify-center gap-1 transition-colors <%= typeof activeTab !== 'undefined' && activeTab === 'scanner' ? 'text-civic-700 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium' %>">
+        <div class="relative p-1 rounded-full <%= typeof activeTab !== 'undefined' && activeTab === 'scanner' ? 'bg-civic-50' : '' %>">
+          <i data-lucide="scan-line" class="w-5 h-5 <%= typeof activeTab !== 'undefined' && activeTab === 'scanner' ? 'stroke-[2.5]' : '' %>"></i>
+        </div>
+        <span class="text-[11px] tracking-tight leading-none" data-i18n="mobile_quick_scan">Scan Waste</span>
+      </a>
+
+      <!-- City Map Tab -->
+      <a href="/map" class="touch-target flex flex-col items-center justify-center gap-1 transition-colors <%= typeof activeTab !== 'undefined' && activeTab === 'map' ? 'text-civic-700 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium' %>">
+        <div class="relative p-1 rounded-full <%= typeof activeTab !== 'undefined' && activeTab === 'map' ? 'bg-civic-50' : '' %>">
+          <i data-lucide="map-pin" class="w-5 h-5 <%= typeof activeTab !== 'undefined' && activeTab === 'map' ? 'stroke-[2.5]' : '' %>"></i>
+          <!-- Subtle live pulse dot -->
+          <span class="absolute top-0 right-0 w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </div>
+        <span class="text-[11px] tracking-tight leading-none" data-i18n="mobile_live_bins">City Map</span>
+      </a>
+
+      <!-- Account Tab -->
+      <a href="/account" class="touch-target flex flex-col items-center justify-center gap-1 transition-colors <%= typeof activeTab !== 'undefined' && activeTab === 'account' ? 'text-civic-700 font-bold' : 'text-slate-500 hover:text-slate-900 font-medium' %>">
+        <div class="relative p-1 rounded-full <%= typeof activeTab !== 'undefined' && activeTab === 'account' ? 'bg-civic-50' : '' %>">
+          <i data-lucide="user-check" class="w-5 h-5 <%= typeof activeTab !== 'undefined' && activeTab === 'account' ? 'stroke-[2.5]' : '' %>"></i>
+        </div>
+        <span class="text-[11px] tracking-tight leading-none" data-i18n="mobile_profile">Account</span>
+      </a>
+
+    </div>
+  </nav>
+
+  <!-- Bilingual i18n Logic -->
+  <script src="/js/i18n.js"></script>
+
+  <!-- Lucide Icon Initialization -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

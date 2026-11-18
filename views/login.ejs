@@ -1,0 +1,121 @@
+<%- include('partials/header') %>
+
+<div class="max-w-md mx-auto my-4 sm:my-8">
+
+  <!-- Welcome / Civic Brand Card -->
+  <div class="bg-white rounded-2xl border border-surface-border p-6 sm:p-8 shadow-sm">
+    
+    <!-- Title & Icon -->
+    <div class="text-center mb-6">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-50 text-civic-700 border border-emerald-100 mb-3 shadow-xs">
+        <i data-lucide="shield-check" class="w-7 h-7"></i>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-900" data-i18n="login_title">Citizen Sign In</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1" data-i18n="login_desc">Access your BMC ward waste services and Green Credits</p>
+    </div>
+
+    <!-- Error Banner -->
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-800 text-xs sm:text-sm">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0 mt-0.5"></i>
+        <span><%= error %></span>
+      </div>
+    <% } %>
+
+    <!-- Success Banner -->
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="mb-5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-emerald-800 text-xs sm:text-sm">
+        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+        <span><%= success %></span>
+      </div>
+    <% } %>
+
+    <!-- PROMINENT ONE-CLICK DEMO CITIZEN LOGIN BUTTON -->
+    <div class="mb-6">
+      <a 
+        href="/auth/demo-login" 
+        class="w-full touch-target flex flex-col items-center justify-center px-4 py-3 bg-gradient-to-r from-emerald-700 to-civic-700 hover:from-emerald-800 hover:to-civic-800 text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 group text-center focus:outline-none focus:ring-4 focus:ring-emerald-200">
+        <div class="flex items-center gap-2 font-bold text-sm sm:text-base">
+          <i data-lucide="zap" class="w-4 h-4 text-amber-300 fill-amber-300 group-hover:scale-110 transition-transform"></i>
+          <span data-i18n="demo_btn">⚡ One-Click Demo Citizen Login</span>
+        </div>
+        <span class="text-[11px] text-emerald-100 mt-0.5" data-i18n="demo_subtext">Instant access as Smarak (Ward 1 - Patia, 120 Green Credits)</span>
+      </a>
+    </div>
+
+    <!-- Clean Divider -->
+    <div class="relative flex items-center justify-center my-6">
+      <div class="border-t border-slate-200 w-full"></div>
+      <span class="bg-white px-3 text-xs text-slate-400 font-medium uppercase tracking-wider">or sign in with password</span>
+    </div>
+
+    <!-- Credentials Login Form -->
+    <form action="/login" method="POST" class="space-y-4">
+      <div>
+        <label for="email" class="block text-xs font-semibold text-slate-700 mb-1.5" data-i18n="email_label">Email Address</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+          </span>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            required 
+            placeholder="citizen@bhubaneswar.gov.in"
+            data-i18n-placeholder="email_placeholder"
+            class="touch-target w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-surface-border rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-civic-700 focus:border-transparent transition-all">
+        </div>
+      </div>
+
+      <div>
+        <label for="password" class="block text-xs font-semibold text-slate-700 mb-1.5" data-i18n="password_label">Password</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </span>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            required 
+            placeholder="••••••••"
+            data-i18n-placeholder="password_placeholder"
+            class="touch-target w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-surface-border rounded-xl text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-civic-700 focus:border-transparent transition-all">
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="touch-target w-full mt-2 flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-sm transition-all focus:outline-none focus:ring-4 focus:ring-slate-300">
+        <span data-i18n="sign_in_btn">Sign In to Mo Safai</span>
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+      </button>
+    </form>
+
+    <!-- Footer Switcher -->
+    <div class="mt-6 pt-5 border-t border-slate-100 text-center">
+      <p class="text-xs text-slate-500">
+        <span data-i18n="no_account">New citizen in Bhubaneswar?</span>
+        <a href="/register" class="font-semibold text-civic-700 hover:text-civic-800 hover:underline ml-1" data-i18n="register_link">Create an account</a>
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Trust Badges -->
+  <div class="mt-6 flex items-center justify-center gap-4 text-xs text-slate-400">
+    <div class="flex items-center gap-1.5">
+      <i data-lucide="shield" class="w-3.5 h-3.5 text-civic-700"></i>
+      <span>Official BMC Citizen Utility</span>
+    </div>
+    <span>•</span>
+    <div class="flex items-center gap-1.5">
+      <i data-lucide="award" class="w-3.5 h-3.5 text-amber-500"></i>
+      <span>Mo Khata Rewards</span>
+    </div>
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>

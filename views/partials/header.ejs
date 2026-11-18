@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="<%= user && user.settings && user.settings.language ? user.settings.language : 'en' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle + ' | ' : '' %>Mo Safai Bhubaneswar | BMC</title>
+  
+  <!-- Civic Web App Icons & Styling -->
+  <meta name="theme-color" content="#15803D">
+  <meta name="description" content="AI Smart Waste Management and Citizen Credits System for Bhubaneswar Municipal Corporation (BMC)">
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, and Noto Sans Oriya for crisp Odia typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Oriya:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            civic: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              600: '#16a34a',
+              700: '#15803D', // Primary Civic Green
+              800: '#166534',
+              900: '#14532d'
+            },
+            terracotta: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              500: '#f59e0b',
+              600: '#D97706', // Warm Terracotta / Amber
+              700: '#b45309'
+            },
+            surface: {
+              bg: '#F8FAFC',
+              card: '#FFFFFF',
+              border: '#E2E8F0',
+              text: '#0F172A',
+              muted: '#64748B'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            odia: ['"Noto Sans Oriya"', '"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons via CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', Inter, -apple-system, sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-odia {
+      font-family: 'Noto Sans Oriya', 'Plus Jakarta Sans', sans-serif !important;
+    }
+    /* Generous touch targets */
+    .touch-target {
+      min-height: 48px;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F1F5F9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 4px;
+    }
+  </style>
+
+  <script>
+    window.__INITIAL_USER_LANG__ = "<%= user && user.settings && user.settings.language ? user.settings.language : 'en' %>";
+  </script>
+</head>
+<body class="bg-surface-bg text-surface-text min-h-screen flex flex-col antialiased pb-20 md:pb-6">
+
+  <!-- Top Civic Header -->
+  <header class="sticky top-0 z-40 bg-white border-b border-surface-border shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Brand & BMC Identity -->
+      <a href="/account" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-civic-700 rounded-lg p-1">
+        <div class="w-10 h-10 rounded-xl bg-civic-700 flex items-center justify-center text-white shadow-sm border border-civic-800">
+          <i data-lucide="recycle" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-base sm:text-lg tracking-tight text-slate-900 group-hover:text-civic-700 transition-colors" data-i18n="app_title">Mo Safai Bhubaneswar</span>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200 uppercase">BMC</span>
+          </div>
+          <p class="text-[11px] text-slate-500 font-medium leading-none" data-i18n="bmc_subtitle">Bhubaneswar Municipal Corporation</p>
+        </div>
+      </a>
+
+      <!-- Right Header Actions: Bilingual Switcher + Green Credits + Desktop Nav -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        
+        <!-- Desktop Nav Links -->
+        <nav class="hidden md:flex items-center gap-1 mr-2 text-sm font-medium">
+          <a href="/map" class="px-3 py-2 rounded-lg text-slate-700 hover:text-civic-700 hover:bg-slate-100 transition-colors flex items-center gap-1.5 <%= typeof activeTab !== 'undefined' && activeTab === 'map' ? 'bg-civic-50 text-civic-700 font-semibold' : '' %>">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+            <span data-i18n="nav_map">City Map</span>
+          </a>
+          <a href="/scanner" class="px-3 py-2 rounded-lg text-slate-700 hover:text-civic-700 hover:bg-slate-100 transition-colors flex items-center gap-1.5 <%= typeof activeTab !== 'undefined' && activeTab === 'scanner' ? 'bg-civic-50 text-civic-700 font-semibold' : '' %>">
+            <i data-lucide="scan-line" class="w-4 h-4"></i>
+            <span data-i18n="nav_scanner">Smart Scanner</span>
+          </a>
+          <a href="/account" class="px-3 py-2 rounded-lg text-slate-700 hover:text-civic-700 hover:bg-slate-100 transition-colors flex items-center gap-1.5 <%= typeof activeTab !== 'undefined' && activeTab === 'account' ? 'bg-civic-50 text-civic-700 font-semibold' : '' %>">
+            <i data-lucide="user-check" class="w-4 h-4"></i>
+            <span data-i18n="nav_account">Citizen Account</span>
+          </a>
+        </nav>
+
+        <!-- Bilingual "English | ଓଡ଼ିଆ" Pill Switcher -->
+        <div class="bg-slate-100 p-0.5 rounded-full border border-surface-border flex items-center shadow-inner" role="group" aria-label="Language Switcher">
+          <button 
+            type="button" 
+            id="lang-btn-en" 
+            onclick="switchLanguage('en')" 
+            class="px-2.5 py-1 text-xs font-semibold rounded-full transition-all duration-150 focus:outline-none"
+            aria-label="Switch to English">
+            English
+          </button>
+          <button 
+            type="button" 
+            id="lang-btn-or" 
+            onclick="switchLanguage('or')" 
+            class="px-2.5 py-1 text-xs font-medium rounded-full transition-all duration-150 focus:outline-none font-odia"
+            aria-label="ଓଡ଼ିଆ ଭାଷା ବାଛନ୍ତୁ">
+            ଓଡ଼ିଆ
+          </button>
+        </div>
+
+        <!-- Green Credits Live Badge -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 bg-emerald-50 border border-emerald-200 text-civic-800 rounded-full font-semibold text-xs sm:text-sm shadow-sm" title="Your BMC Green Credits">
+          <i data-lucide="leaf" class="w-3.5 h-3.5 text-civic-700 fill-civic-700"></i>
+          <span id="headerCreditsCount" class="font-bold text-civic-900"><%= user ? user.greenCredits : 120 %></span>
+          <span class="text-[11px] text-civic-700 hidden sm:inline" data-i18n="credits_unit">Credits</span>
+        </div>
+
+        <!-- Logout for desktop if user logged in -->
+        <% if (user) { %>
+          <a href="/logout" class="hidden md:inline-flex p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors" title="Sign Out">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </a>
+        <% } %>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">

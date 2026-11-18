@@ -1,0 +1,200 @@
+<%- include('partials/header') %>
+
+<div class="space-y-6">
+
+  <!-- Map / Telemetry Header -->
+  <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-civic-800 border border-emerald-200">
+            <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping mr-1.5"></span>
+            LIVE TELEMETRY
+          </span>
+          <span class="text-xs text-slate-400 font-medium">Bhubaneswar IoT Grid</span>
+        </div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1" data-i18n="map_title">
+          Live Smart Bin Telemetry
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5" data-i18n="map_desc">
+          Real-time ultrasonic fill-level sensors across Bhubaneswar wards
+        </p>
+      </div>
+
+      <!-- Quick Status Badges -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center gap-1.5 font-medium text-slate-700">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span data-i18n="status_normal">Normal (&lt;50%)</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center gap-1.5 font-medium text-slate-700">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span data-i18n="status_filling">Filling (50-80%)</span>
+        </div>
+        <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center gap-1.5 font-medium text-slate-700">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+          <span data-i18n="status_critical">Critical (&gt;80%)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ward Filter Pills -->
+    <div class="mt-5 pt-4 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+      <span class="text-slate-400 font-semibold whitespace-nowrap">Filter Ward:</span>
+      <button onclick="filterBins('all')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-civic-700 text-white font-medium whitespace-nowrap transition-all" data-ward="all" data-i18n="filter_all">All Wards</button>
+      <button onclick="filterBins('Patia')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Patia">Patia</button>
+      <button onclick="filterBins('Jaydev Vihar')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Jaydev Vihar">Jaydev Vihar</button>
+      <button onclick="filterBins('Saheed Nagar')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Saheed Nagar">Saheed Nagar</button>
+      <button onclick="filterBins('Old Town / Lingaraj')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Old Town / Lingaraj">Old Town</button>
+      <button onclick="filterBins('Bapuji Nagar')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Bapuji Nagar">Bapuji Nagar</button>
+      <button onclick="filterBins('Khandagiri')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Khandagiri">Khandagiri</button>
+    </div>
+  </div>
+
+  <!-- Live Bin Telemetry Cards Grid -->
+  <div id="binsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <% bins.forEach(bin => { %>
+      <div 
+        class="bin-card bg-white rounded-2xl border border-surface-border p-5 shadow-xs hover:shadow-md transition-all duration-200"
+        data-ward-name="<%= bin.wardName %>"
+        data-bin-id="<%= bin.binId %>">
+        
+        <!-- Card Header: ID, Stream & Status Badge -->
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-sm text-slate-900 tracking-tight"><%= bin.binId %></span>
+            <% if (bin.wasteStream === 'Wet') { %>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                <i data-lucide="apple" class="w-3 h-3"></i>
+                <span data-i18n="stream_wet">Wet (Organic)</span>
+              </span>
+            <% } else { %>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1">
+                <i data-lucide="box" class="w-3 h-3"></i>
+                <span data-i18n="stream_dry">Dry (Recyclable)</span>
+              </span>
+            <% } %>
+          </div>
+
+          <!-- Dynamic Status Badge -->
+          <span class="status-pill px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 <%= bin.status === 'Critical' ? 'bg-rose-100 text-rose-800 border border-rose-200' : (bin.status === 'Filling' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200') %>">
+            <span class="w-1.5 h-1.5 rounded-full <%= bin.status === 'Critical' ? 'bg-rose-600' : (bin.status === 'Filling' ? 'bg-amber-600' : 'bg-emerald-600') %>"></span>
+            <span class="status-text"><%= bin.status %></span>
+          </span>
+        </div>
+
+        <!-- Location Info -->
+        <div class="text-xs text-slate-500 mb-3 space-y-0.5">
+          <div class="font-semibold text-slate-800 flex items-center gap-1">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-civic-700"></i>
+            <span>Ward <%= bin.wardNumber %>: <%= bin.wardName %></span>
+            <span class="text-[10px] text-slate-400 font-normal">(<%= bin.zone %> Zone)</span>
+          </div>
+          <div class="text-[11px] text-slate-400 pl-4.5">
+            GPS: <%= bin.lat.toFixed(4) %>°N, <%= bin.lng.toFixed(4) %>°E
+          </div>
+        </div>
+
+        <!-- Fill Level Progress -->
+        <div class="mt-4 pt-3 border-t border-slate-100">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="font-medium text-slate-600" data-i18n="bin_level">Fill Level</span>
+            <span class="font-bold text-slate-900 fill-level-text"><%= bin.fillLevel %>%</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div 
+              class="fill-progress-bar h-full rounded-full transition-all duration-500 <%= bin.fillLevel >= 80 ? 'bg-rose-600' : (bin.fillLevel >= 50 ? 'bg-amber-500' : 'bg-emerald-600') %>"
+              style="width: <%= bin.fillLevel %>%">
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry Footer -->
+        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+          <span class="flex items-center gap-1">
+            <i data-lucide="radio" class="w-3 h-3 text-emerald-600"></i>
+            <span data-i18n="bin_last_update">Updated</span>: <span class="last-updated-text" data-i18n="just_now">Just now</span>
+          </span>
+          <span class="text-[10px] text-slate-400 font-mono">ID:<%= bin.binId %></span>
+        </div>
+
+      </div>
+    <% }) %>
+  </div>
+
+</div>
+
+<!-- Real-time Polling Script for Map View -->
+<script>
+  let activeFilter = 'all';
+
+  function filterBins(ward) {
+    activeFilter = ward;
+    document.querySelectorAll('.ward-filter-btn').forEach(btn => {
+      if (btn.getAttribute('data-ward') === ward) {
+        btn.className = "ward-filter-btn px-3 py-1.5 rounded-lg bg-civic-700 text-white font-medium whitespace-nowrap transition-all";
+      } else {
+        btn.className = "ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all";
+      }
+    });
+
+    document.querySelectorAll('.bin-card').forEach(card => {
+      const cardWard = card.getAttribute('data-ward-name');
+      if (ward === 'all' || cardWard === ward) {
+        card.style.display = 'block';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  // Poll GET /api/bins every 6 seconds to reflect IoT simulator telemetry
+  async function fetchLiveBins() {
+    try {
+      const res = await fetch('/api/bins');
+      const json = await res.json();
+      if (json.success && json.data) {
+        json.data.forEach(bin => {
+          const card = document.querySelector(`.bin-card[data-bin-id="${bin.binId}"]`);
+          if (card) {
+            // Update fill level
+            const fillText = card.querySelector('.fill-level-text');
+            if (fillText) fillText.textContent = `${bin.fillLevel}%`;
+
+            const progressBar = card.querySelector('.fill-progress-bar');
+            if (progressBar) {
+              progressBar.style.width = `${bin.fillLevel}%`;
+              progressBar.className = `fill-progress-bar h-full rounded-full transition-all duration-500 ${
+                bin.fillLevel >= 80 ? 'bg-rose-600' : (bin.fillLevel >= 50 ? 'bg-amber-500' : 'bg-emerald-600')
+              }`;
+            }
+
+            // Update status pill
+            const statusPill = card.querySelector('.status-pill');
+            const statusText = card.querySelector('.status-text');
+            if (statusPill && statusText) {
+              statusText.textContent = bin.status;
+              statusPill.className = `status-pill px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 ${
+                bin.status === 'Critical' ? 'bg-rose-100 text-rose-800 border border-rose-200' :
+                (bin.status === 'Filling' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200')
+              }`;
+              const dot = statusPill.querySelector('span');
+              if (dot) {
+                dot.className = `w-1.5 h-1.5 rounded-full ${
+                  bin.status === 'Critical' ? 'bg-rose-600' : (bin.status === 'Filling' ? 'bg-amber-600' : 'bg-emerald-600')
+                }`;
+              }
+            }
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('Live telemetry poll failed:', err);
+    }
+  }
+
+  // Set interval every 6 seconds
+  setInterval(fetchLiveBins, 6000);
+</script>
+
+<%- include('partials/footer') %>
