@@ -98,7 +98,8 @@ router.post('/api/scan', upload.single('wasteImage'), async (req, res) => {
       aiInstructionOr: analysis.instructionOr,
       confidence: analysis.confidence || '95%',
       imageUrl,
-      creditsEarned
+      creditsEarned,
+      status: ticketId ? 'Dispatched' : 'Resolved'
     });
 
     return res.json({

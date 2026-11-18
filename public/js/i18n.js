@@ -142,7 +142,33 @@ const translations = {
     // Footer / Mobile
     mobile_quick_scan: "Scan Waste",
     mobile_live_bins: "City Map",
-    mobile_profile: "Account"
+    mobile_profile: "Account",
+
+    // Stage 4 Civic Impact & Ward Leaderboard
+    landing_hero_title: "AI Smart Waste Management & Dual-Stream Routing",
+    landing_hero_desc: "Empowering 1+ million citizens across 67 BMC wards with Gemini Vision waste classification, Mo Khata bio-composting, and Haversine truck route optimization.",
+    btn_launch_scanner: "Launch AI Scanner",
+    btn_open_map: "Open Command Map",
+    btn_citizen_portal: "Citizen Portal",
+    civic_impact_heading: "Live Municipal Civic Impact",
+    civic_impact_desc: "Real-time environmental telemetry aggregated from 12 IoT smart bins and citizen reports across Bhubaneswar",
+    stat_total_scans: "Total AI Scans",
+    stat_wet_diverted: "Organic Diverted",
+    stat_mo_khata: "Mo Khata Bio-Compost",
+    stat_fuel_saved: "Fuel & CO₂ Prevented",
+    stat_active_tickets: "Active 1929 Complaints",
+    stat_resolved_tickets: "Resolved Complaints",
+    leaderboard_heading: "Top Clean Wards Leaderboard",
+    leaderboard_desc: "Live ranking of Bhubaneswar wards based on smart bin health scores, citizen Green Credits, and rapid grievance resolution",
+    ward_rank_col: "Rank",
+    ward_name_col: "BMC Ward & Landmark",
+    ward_score_col: "Clean Score",
+    ward_grade_col: "Grade",
+    ward_status_col: "Sanitation Status",
+    btn_mark_resolved: "Mark Resolved",
+    status_resolved: "RESOLVED",
+    toast_ticket_resolved: "Ticket marked as resolved! BMC sanitation records updated.",
+    offline_demo_notice: "Network or AI service unavailable. Tap any Quick Demo Sample below for instant demonstration."
   },
   
   or: {
@@ -287,7 +313,33 @@ const translations = {
     // Footer / Mobile
     mobile_quick_scan: "ସ୍କାନ୍ କରନ୍ତୁ",
     mobile_live_bins: "ମାନଚିତ୍ର",
-    mobile_profile: "ଖାତା"
+    mobile_profile: "ଖାତା",
+
+    // Stage 4 Civic Impact & Ward Leaderboard
+    landing_hero_title: "ଏଆଇ ସ୍ମାର୍ଟ ବର୍ଜ୍ୟ ପରିଚାଳନା ଓ ଦ୍ୱି-ସ୍ତରୀୟ ରୁଟ୍ ବ୍ୟବସ୍ଥା",
+    landing_hero_desc: "ଭୁବନେଶ୍ୱରର ୬୭ଟି ୱାର୍ଡରେ ଜେମିନି ଭିଜନ ଦ୍ୱାରା ବର୍ଜ୍ୟ ପୃଥକୀକରଣ, ମୋ ଖାତା ଜୈବିକ ଖତ ଉତ୍ପାଦନ ଏବଂ ସଫେଇ ଗାଡ଼ି ରୁଟ୍ ଅପ୍ଟିମାଇଜେସନ୍।",
+    btn_launch_scanner: "ଏଆଇ ସ୍କାନର ଆରମ୍ଭ କରନ୍ତୁ",
+    btn_open_map: "କମାଣ୍ଡ୍ ମାନଚିତ୍ର ଦେଖନ୍ତୁ",
+    btn_citizen_portal: "ନାଗରିକ ପୋର୍ଟାଲ୍",
+    civic_impact_heading: "ଲାଇଭ୍ ମ୍ୟୁନିସିପାଲ୍ ସ୍ୱଚ୍ଛତା ପ୍ରଭାବ (ଇମ୍ପାକ୍ଟ)",
+    civic_impact_desc: "୧୨ଟି ଆଇଓଟି ସ୍ମାର୍ଟ ଡଷ୍ଟବିନ୍ ଏବଂ ନାଗରିକ ରିପୋର୍ଟରୁ ସଂଗୃହୀତ ରିଅଲ-ଟାଇମ୍ ପରିବେଶ ତଥ୍ୟ",
+    stat_total_scans: "ମୋଟ ଏଆଇ ସ୍କାନ୍",
+    stat_wet_diverted: "ଜୈବିକ ବର୍ଜ୍ୟ ସଂଗ୍ରହ",
+    stat_mo_khata: "ମୋ ଖାତା ଜୈବିକ ଖତ",
+    stat_fuel_saved: "ଇନ୍ଧନ ଓ କାର୍ବନ ସଞ୍ଚୟ",
+    stat_active_tickets: "ସକ୍ରିୟ ୧୯୨୯ ଅଭିଯୋଗ",
+    stat_resolved_tickets: "ସମାଧାନ ହୋଇଥିବା ଅଭିଯୋଗ",
+    leaderboard_heading: "ଶ୍ରେଷ୍ଠ ସ୍ୱଚ୍ଛ ୱାର୍ଡ ଲିଡରବୋର୍ଡ",
+    leaderboard_desc: "ସ୍ମାର୍ଟ ଡଷ୍ଟବିନ୍ ସ୍ୱାସ୍ଥ୍ୟ ସ୍କୋର୍, ସବୁଜ କ୍ରେଡିଟ୍ ଓ ତ୍ୱରିତ ଅଭିଯୋଗ ସମାଧାନ ଉପରେ ଆଧାରିତ ଲାଇଭ୍ ର଼୍ୟାଙ୍କିଙ୍ଗ୍",
+    ward_rank_col: "ର଼୍ୟାଙ୍କ୍",
+    ward_name_col: "ବିଏମସି ୱାର୍ଡ ଓ ଲ୍ୟାଣ୍ଡମାର୍କ",
+    ward_score_col: "ସ୍ୱଚ୍ଛତା ସ୍କୋର୍",
+    ward_grade_col: "ଗ୍ରେଡ୍",
+    ward_status_col: "ସଫେଇ ସ୍ଥିତି",
+    btn_mark_resolved: "ସମାଧାନ ହୋଇଛି",
+    status_resolved: "ସମାଧାନ ହୋଇଛି",
+    toast_ticket_resolved: "ଅଭିଯୋଗ ଟିକେଟ୍ ସଫଳତାର ସହ ସମାଧାନ ହେଲା! ବିଏମସି ରେକର୍ଡ ଅପଡେଟ୍ ହୋଇଛି।",
+    offline_demo_notice: "ନେଟୱାର୍କ ବା ଏଆଇ ସେବା ଉପଲବ୍ଧ ନାହିଁ। ତୁରନ୍ତ ପରୀକ୍ଷା ପାଇଁ ତଳେ ଥିବା ଡେମୋ ନମୁନା ବ୍ୟବହାର କରନ୍ତୁ।"
   }
 };
 

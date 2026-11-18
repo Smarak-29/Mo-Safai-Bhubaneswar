@@ -153,6 +153,29 @@
 
   </div>
 
+  <!-- Graceful Connection / Stage Fallback Alert Card (Stage 4) -->
+  <div id="scanErrorCard" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 sm:p-5 shadow-xs transition-all">
+    <div class="flex items-start gap-3">
+      <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0">
+        <i data-lucide="wifi-off" class="w-5 h-5"></i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-sm font-bold text-rose-900" id="scanErrorTitle">Connection Alert / ସଂଯୋଗ ସତର୍କତା</h3>
+        <p class="text-xs text-rose-700 mt-1" id="scanErrorMsg">
+          Network or AI Vision response delayed. Tap any of our instant 1-click Quick Demo Samples below for instant live demonstration!
+        </p>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <button type="button" onclick="runSampleScan('wet')" class="touch-target text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs">
+            🥗 Demo Wet Waste
+          </button>
+          <button type="button" onclick="runSampleScan('overflowing')" class="touch-target text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white shadow-xs">
+            🚨 Demo 1929 Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- RESULT CARD (Dynamically Populated after Gemini Scan) -->
   <div id="resultCard" class="hidden space-y-4">
 
@@ -381,12 +404,14 @@
     const previewState = document.getElementById('dropzonePreview');
     const actionContainer = document.getElementById('scanActionContainer');
     const resultCard = document.getElementById('resultCard');
+    const errorCard = document.getElementById('scanErrorCard');
 
     emptyState.classList.add('hidden');
     previewState.classList.add('hidden');
     actionContainer.classList.add('hidden');
     loader.classList.remove('hidden');
     resultCard.classList.add('hidden');
+    if (errorCard) errorCard.classList.add('hidden');
 
     try {
       const response = await fetch('/api/scan', {
@@ -398,11 +423,11 @@
       if (res.success && res.data) {
         renderScanResult(res.data);
       } else {
-        alert(res.error || 'Failed to analyze waste image.');
+        showScanError(res.error || 'Failed to analyze waste image. Please retry or click a demo sample.');
       }
     } catch (err) {
       console.error('Scan request error:', err);
-      alert('Error communicating with BMC AI scanner service.');
+      showScanError('Network or AI Vision response delayed. Tap any of our instant 1-click Quick Demo Samples below for instant live demonstration!');
     } finally {
       loader.classList.add('hidden');
       if (selectedFile) {
@@ -412,6 +437,15 @@
         emptyState.classList.remove('hidden');
       }
       lucide.createIcons();
+    }
+  }
+
+  function showScanError(msg) {
+    const errorCard = document.getElementById('scanErrorCard');
+    const errorMsg = document.getElementById('scanErrorMsg');
+    if (errorCard && errorMsg) {
+      errorMsg.textContent = msg;
+      errorCard.classList.remove('hidden');
     }
   }
 

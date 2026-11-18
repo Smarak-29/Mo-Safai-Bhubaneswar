@@ -10,6 +10,10 @@ const {
   resetAllBins,
   FACILITIES
 } = require('../utils/routeOptimizer');
+const {
+  getMunicipalImpactMetrics,
+  getWardLeaderboard
+} = require('../utils/civicMetrics');
 
 // API: Get all bins as JSON
 router.get('/api/bins', async (req, res) => {
@@ -35,10 +39,15 @@ router.get('/account', requireAuth, async (req, res) => {
       return res.redirect('/login');
     }
 
+    const metrics = await getMunicipalImpactMetrics();
+    const leaderboard = await getWardLeaderboard();
+
     res.render('account', {
       pageTitle: 'Citizen Account',
       activeTab: 'account',
       user,
+      metrics,
+      leaderboard,
       saved: req.query.saved === 'true',
       error: req.query.error || null
     });
@@ -209,12 +218,90 @@ router.get('/scanner', async (req, res) => {
   }
 });
 
-// Root Route: redirect to /account or /login
-router.get('/', (req, res) => {
-  if (req.session && req.session.userId) {
-    return res.redirect('/account');
+// API: Live Municipal Civic Impact Metrics & Ward Leaderboard
+router.get('/api/impact-metrics', async (req, res) => {
+  try {
+    const metrics = await getMunicipalImpactMetrics();
+    const leaderboard = await getWardLeaderboard();
+    res.json({
+      success: true,
+      data: {
+        metrics,
+        leaderboard
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching impact metrics:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
-  res.redirect('/login');
+});
+
+// API: 1-Click BMC 1929 Grievance Ticket Resolution
+const handleResolveTicket = async (req, res) => {
+  try {
+    const ticketIdParam = req.params.id;
+    let report = null;
+
+    if (ticketIdParam.match(/^[0-9a-fA-F]{24}$/)) {
+      report = await Report.findById(ticketIdParam);
+    }
+    if (!report) {
+      report = await Report.findOne({ ticketId: ticketIdParam });
+    }
+
+    if (!report) {
+      return res.status(404).json({ success: false, error: 'BMC Grievance ticket not found' });
+    }
+
+    report.status = 'Resolved';
+    report.resolvedAt = new Date();
+    await report.save();
+
+    res.json({
+      success: true,
+      message: `Grievance ticket ${report.ticketId || report.scanId} marked as RESOLVED by BMC Sanitation Control.`,
+      ticket: {
+        id: report._id,
+        ticketId: report.ticketId,
+        status: report.status,
+        resolvedAt: report.resolvedAt,
+        wardName: report.wardName
+      }
+    });
+  } catch (err) {
+    console.error('Error resolving ticket:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+router.post('/api/tickets/:id/resolve', handleResolveTicket);
+router.patch('/api/tickets/:id/resolve', handleResolveTicket);
+
+// Landing Page: Public Civic Impact Portal & Ward Leaderboard
+router.get('/', async (req, res) => {
+  try {
+    let user = null;
+    if (req.session && req.session.userId) {
+      user = await User.findById(req.session.userId);
+    }
+    const metrics = await getMunicipalImpactMetrics();
+    const leaderboard = await getWardLeaderboard();
+    const recentTickets = await Report.find({ isOverflowing: true })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.render('index', {
+      pageTitle: 'Mo Safai Bhubaneswar | AI Civic Waste Management',
+      activeTab: 'home',
+      user,
+      metrics,
+      leaderboard,
+      recentTickets
+    });
+  } catch (err) {
+    console.error('Error loading landing page:', err);
+    res.redirect('/login');
+  }
 });
 
 module.exports = router;

@@ -509,6 +509,72 @@ function renderDriverManifest(wetRoute, dryRoute) {
   }
 }
 
+// 1-Click BMC 1929 Grievance Ticket Resolution
+async function resolveTicket(ticketId, btnElement) {
+  if (!ticketId) return;
+  try {
+    if (btnElement) {
+      btnElement.disabled = true;
+      btnElement.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-1 h-3.5 w-3.5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Resolving...</span>
+      `;
+    }
+
+    const res = await fetch(`/api/tickets/${ticketId}/resolve`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      if (btnElement) {
+        const ticketRow = btnElement.closest('.ticket-item');
+        if (ticketRow) {
+          const statusBadge = ticketRow.querySelector('.ticket-status-badge');
+          if (statusBadge) {
+            statusBadge.textContent = (typeof currentLanguage !== 'undefined' && currentLanguage === 'or') ? 'ସମାଧାନ ହୋଇଛି' : 'RESOLVED';
+            statusBadge.className = 'ticket-status-badge px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200';
+          }
+          const iconWrapper = ticketRow.querySelector('.w-7.h-7');
+          if (iconWrapper) {
+            iconWrapper.className = 'w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center flex-shrink-0';
+            iconWrapper.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-700"><polyline points="20 6 9 17 4 12"/></svg>`;
+          }
+        }
+        btnElement.outerHTML = `
+          <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>Resolved</span>
+          </span>
+        `;
+      }
+      const toastMsg = (typeof currentLanguage !== 'undefined' && currentLanguage === 'or')
+        ? `ଅଭିଯୋଗ ଟିକେଟ୍ ସଫଳତାର ସହ ସମାଧାନ ହେଲା! ବିଏମସି ସଫେଇ ରେକର୍ଡ ଅପଡେଟ୍ ହୋଇଛି।`
+        : `BMC 1929 Ticket marked as Resolved! Sanitation crew closed report.`;
+      showMapToast(toastMsg);
+    } else {
+      alert(data.error || 'Failed to resolve ticket');
+      if (btnElement) {
+        btnElement.disabled = false;
+        btnElement.innerHTML = `<span>Mark Resolved</span>`;
+      }
+    }
+  } catch (err) {
+    console.error('Error resolving ticket:', err);
+    if (btnElement) {
+      btnElement.disabled = false;
+      btnElement.innerHTML = `<span>Mark Resolved</span>`;
+    }
+  }
+}
+
 // Toast Notification
 function showMapToast(msg) {
   const toast = document.getElementById('mapToast');

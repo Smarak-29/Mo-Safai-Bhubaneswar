@@ -269,25 +269,45 @@
     <div class="space-y-2.5">
       <% if (typeof tickets !== 'undefined' && tickets && tickets.length > 0) { %>
         <% tickets.forEach(t => { %>
-          <div class="p-3 rounded-xl border border-surface-border bg-slate-50/60 flex items-center justify-between gap-3 text-xs">
+          <div class="ticket-item p-3 rounded-xl border border-surface-border bg-slate-50/60 flex items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2.5">
-              <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-900 font-bold flex items-center justify-center flex-shrink-0">
-                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-terracotta-600"></i>
+              <span class="w-7 h-7 rounded-lg <%= t.status === 'Resolved' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900' %> font-bold flex items-center justify-center flex-shrink-0">
+                <i data-lucide="<%= t.status === 'Resolved' ? 'check' : 'alert-triangle' %>" class="w-3.5 h-3.5 <%= t.status === 'Resolved' ? 'text-emerald-700' : 'text-terracotta-600' %>"></i>
               </span>
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="font-mono font-bold text-slate-900"><%= t.ticketId %></span>
-                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" data-i18n="status_dispatched">
-                    DISPATCHED
-                  </span>
+                  <span class="font-mono font-bold text-slate-900"><%= t.ticketId || t.scanId %></span>
+                  <% if (t.status === 'Resolved') { %>
+                    <span class="ticket-status-badge px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-200" data-i18n="status_resolved">
+                      RESOLVED
+                    </span>
+                  <% } else { %>
+                    <span class="ticket-status-badge px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" data-i18n="status_dispatched">
+                      DISPATCHED
+                    </span>
+                  <% } %>
                 </div>
                 <p class="text-[11px] text-slate-500 mt-0.5"><%= t.wardName %> • <%= t.wasteCategory %></p>
               </div>
             </div>
-            <div class="text-right">
-              <span class="text-[11px] text-slate-400">
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-400 hidden sm:inline">
                 <%= new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
               </span>
+              <% if (t.status === 'Resolved') { %>
+                <span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  <span data-i18n="status_resolved">Resolved</span>
+                </span>
+              <% } else { %>
+                <button 
+                  type="button" 
+                  onclick="resolveTicket('<%= t._id %>', this)" 
+                  class="btn-resolve touch-target inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white shadow-xs transition-colors">
+                  <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                  <span data-i18n="btn_mark_resolved">Mark Resolved</span>
+                </button>
+              <% } %>
             </div>
           </div>
         <% }) %>

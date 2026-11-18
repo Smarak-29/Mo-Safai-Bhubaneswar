@@ -83,6 +83,88 @@
     </div>
   </div>
 
+  <!-- Live Civic Impact Summary Strip (Stage 4) -->
+  <% if (typeof metrics !== 'undefined' && metrics) { %>
+    <div class="bg-white rounded-2xl border border-surface-border p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-surface-border pb-3">
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="activity" class="w-4 h-4 text-civic-700"></i>
+            <span data-i18n="civic_impact_heading">Live Municipal Civic Impact</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5" data-i18n="civic_impact_desc">Bhubaneswar-wide telemetry across 67 BMC wards</p>
+        </div>
+        <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+          BMC Telemetry
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="text-[11px] text-slate-500 font-medium block" data-i18n="stat_total_scans">Total AI Scans</span>
+          <span class="text-xl font-extrabold text-slate-900 mt-0.5 block"><%= metrics.totalScans %></span>
+          <span class="text-[10px] text-emerald-700 font-semibold"><%= metrics.wetScans %> Wet • <%= metrics.dryScans %> Dry</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="text-[11px] text-slate-500 font-medium block" data-i18n="stat_mo_khata">Mo Khata Yield</span>
+          <span class="text-xl font-extrabold text-slate-900 mt-0.5 block"><%= metrics.compostKg %> kg</span>
+          <span class="text-[10px] text-purple-700 font-semibold">Niladri Vihar MCC</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="text-[11px] text-slate-500 font-medium block" data-i18n="stat_fuel_saved">Fuel & CO₂ Saved</span>
+          <span class="text-xl font-extrabold text-slate-900 mt-0.5 block"><%= metrics.fuelSavedL %> L</span>
+          <span class="text-[10px] text-amber-700 font-semibold"><%= metrics.co2SavedKg %> kg CO₂</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
+          <span class="text-[11px] text-slate-500 font-medium block" data-i18n="stat_active_tickets">Active 1929</span>
+          <span class="text-xl font-extrabold text-slate-900 mt-0.5 block"><%= metrics.activeTickets %></span>
+          <span class="text-[10px] text-slate-500 font-semibold"><%= metrics.resolvedTickets %> Resolved</span>
+        </div>
+      </div>
+    </div>
+  <% } %>
+
+  <!-- Top Clean Wards Leaderboard Strip (Stage 4) -->
+  <% if (typeof leaderboard !== 'undefined' && leaderboard && leaderboard.length > 0) { %>
+    <div class="bg-white rounded-2xl border border-surface-border p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-surface-border pb-3">
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+            <span data-i18n="leaderboard_heading">Top Clean Wards Leaderboard</span>
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5" data-i18n="leaderboard_desc">Ranked by smart bin scores and citizen participation</p>
+        </div>
+        <a href="/map" class="text-xs font-semibold text-civic-700 hover:text-civic-800 flex items-center gap-1">
+          <span>View Map</span>
+          <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+
+      <div class="space-y-2">
+        <% leaderboard.slice(0, 4).forEach((ward) => { %>
+          <div class="p-2.5 rounded-xl border border-slate-100 bg-slate-50/70 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg <%= ward.rank === 1 ? 'bg-amber-400 text-amber-950 font-bold' : ward.rank === 2 ? 'bg-slate-200 text-slate-800 font-bold' : 'bg-slate-100 text-slate-600 font-medium' %> flex items-center justify-center text-[10px]">
+                #<%= ward.rank %>
+              </span>
+              <div>
+                <strong class="text-slate-900"><%= ward.wardName %></strong>
+                <p class="text-[11px] text-slate-500"><%= ward.landmark %></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <span class="font-bold text-slate-900"><%= ward.cleanScore %>/100</span>
+                <span class="text-[10px] text-emerald-700 font-semibold block">Grade <%= ward.grade %></span>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
+
   <!-- Settings & Preferences Card -->
   <div class="bg-white rounded-2xl border border-surface-border p-6 shadow-sm">
     <div class="border-b border-surface-border pb-4 mb-5">

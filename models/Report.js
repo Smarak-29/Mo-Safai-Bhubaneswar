@@ -43,6 +43,14 @@ const ReportSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  status: {
+    type: String,
+    enum: ['Open', 'Dispatched', 'Resolved'],
+    default: 'Open'
+  },
+  resolvedAt: {
+    type: Date
+  },
   aiInstructionEn: {
     type: String,
     required: true
