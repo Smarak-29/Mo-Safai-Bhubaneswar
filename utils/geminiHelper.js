@@ -67,7 +67,7 @@ async function analyzeWasteImage({ imageBuffer, mimeType = 'image/jpeg', sampleT
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = new GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
 
     const prompt = `You are the Bhubaneswar Municipal Corporation (BMC) AI Smart Waste Segregation & Sanitation Assistant for Odisha, India.
 Analyze the uploaded photo and return ONLY a valid JSON object (no markdown, no backticks) with these exact fields:
@@ -92,7 +92,7 @@ Special BMC Rules:
     console.log(`[Gemini Vision] Invoking Gemini Vision with image (${mimeType}, size: ${imageBuffer.length} bytes)...`);
 
     let response;
-    let selectedModel = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+    let selectedModel = process.env.GEMINI_MODEL || 'gemini-robotics-er-2-preview';
 
     try {
       response = await ai.models.generateContent({
@@ -112,7 +112,7 @@ Special BMC Rules:
       });
     } catch (modelErr) {
       // Fallback between gemini-3.8-flash and gemini-2.5-flash based on account availability
-      const fallbackModel = (selectedModel === 'gemini-3.8-flash') ? 'gemini-2.5-flash' : 'gemini-3.8-flash';
+      const fallbackModel = 'gemini-robotics-er-2-preview';
       console.log(`[Gemini Vision] Model ${selectedModel} returned notice, trying ${fallbackModel}...`);
       selectedModel = fallbackModel;
       response = await ai.models.generateContent({
