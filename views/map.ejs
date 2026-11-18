@@ -1,200 +1,307 @@
 <%- include('partials/header') %>
 
+<!-- Leaflet.js CDN -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<style>
+  /* Leaflet Map Custom Marker Styles */
+  .custom-bin-marker {
+    background: transparent;
+    border: none;
+  }
+  .facility-marker-icon {
+    background: transparent;
+    border: none;
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: 14px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+    border: 1px solid #E2E8F0;
+    padding: 2px;
+  }
+  .leaflet-popup-tip {
+    background: white;
+    border: 1px solid #E2E8F0;
+  }
+  /* Pulsing Animation for Critical Bins */
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+  .animate-ping {
+    animation: ping 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+</style>
+
 <div class="space-y-6">
 
-  <!-- Map / Telemetry Header -->
+  <!-- Floating Toast Notification -->
+  <div 
+    id="mapToast" 
+    class="hidden fixed top-20 right-4 sm:right-8 z-50 items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-700 transition-all duration-300">
+    <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+      <i data-lucide="check" class="w-4 h-4"></i>
+    </div>
+    <span id="mapToastMsg" class="text-xs sm:text-sm font-medium">Action completed successfully!</span>
+  </div>
+
+  <!-- Header & Demo Control Bar Card -->
   <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div>
         <div class="flex items-center gap-2">
           <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-civic-800 border border-emerald-200">
-            <span class="w-2 h-2 rounded-full bg-emerald-600 animate-ping mr-1.5"></span>
-            LIVE TELEMETRY
+            <span class="w-2 h-2 rounded-full bg-emerald-600 mr-1.5 animate-pulse"></span>
+            BMC COMMAND CENTER
           </span>
           <span class="text-xs text-slate-400 font-medium">Bhubaneswar IoT Grid</span>
         </div>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 mt-1" data-i18n="map_title">
-          Live Smart Bin Telemetry
+          Municipal Command Map
         </h1>
         <p class="text-xs sm:text-sm text-slate-500 mt-0.5" data-i18n="map_desc">
-          Real-time ultrasonic fill-level sensors across Bhubaneswar wards
+          Dual-stream sanitation truck route optimizer & real-time telemetry grid
         </p>
       </div>
 
-      <!-- Quick Status Badges -->
+      <!-- Action Buttons: Simulate Spike, Reset, and Optimize Routes -->
       <div class="flex items-center gap-2 flex-wrap">
-        <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center gap-1.5 font-medium text-slate-700">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-          <span data-i18n="status_normal">Normal (&lt;50%)</span>
-        </div>
-        <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center gap-1.5 font-medium text-slate-700">
-          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-          <span data-i18n="status_filling">Filling (50-80%)</span>
-        </div>
-        <div class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center gap-1.5 font-medium text-slate-700">
-          <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-          <span data-i18n="status_critical">Critical (&gt;80%)</span>
-        </div>
+        <button 
+          type="button" 
+          id="btnSimulateSpike" 
+          onclick="triggerOverflowSpike()"
+          class="touch-target px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-2xs">
+          <i data-lucide="zap" class="w-4 h-4 text-amber-600 fill-amber-500"></i>
+          <span data-i18n="btn_simulate_spike">⚡ Simulate Overflow Spike</span>
+        </button>
+
+        <button 
+          type="button" 
+          id="btnResetBins" 
+          onclick="triggerResetBins()"
+          class="touch-target px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs flex items-center gap-1.5 transition-colors">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-500"></i>
+          <span data-i18n="btn_reset_bins">Reset Bins</span>
+        </button>
+
+        <button 
+          type="button" 
+          id="btnOptimizeRoutes" 
+          onclick="optimizeTruckRoutes()"
+          class="touch-target px-4 py-2.5 rounded-xl bg-civic-700 hover:bg-civic-800 active:bg-civic-900 text-white font-bold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-200">
+          <i data-lucide="truck" class="w-4 h-4 text-amber-300"></i>
+          <span data-i18n="btn_optimize_routes">🚛 Optimize Truck Routes</span>
+        </button>
       </div>
     </div>
 
-    <!-- Ward Filter Pills -->
-    <div class="mt-5 pt-4 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-      <span class="text-slate-400 font-semibold whitespace-nowrap">Filter Ward:</span>
-      <button onclick="filterBins('all')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-civic-700 text-white font-medium whitespace-nowrap transition-all" data-ward="all" data-i18n="filter_all">All Wards</button>
-      <button onclick="filterBins('Patia')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Patia">Patia</button>
-      <button onclick="filterBins('Jaydev Vihar')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Jaydev Vihar">Jaydev Vihar</button>
-      <button onclick="filterBins('Saheed Nagar')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Saheed Nagar">Saheed Nagar</button>
-      <button onclick="filterBins('Old Town / Lingaraj')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Old Town / Lingaraj">Old Town</button>
-      <button onclick="filterBins('Bapuji Nagar')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Bapuji Nagar">Bapuji Nagar</button>
-      <button onclick="filterBins('Khandagiri')" class="ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all" data-ward="Khandagiri">Khandagiri</button>
+    <!-- Zone Filter Pills -->
+    <div class="mt-5 pt-4 border-t border-slate-100 flex items-center gap-2 overflow-x-auto pb-1">
+      <span class="text-xs text-slate-500 font-semibold whitespace-nowrap" data-i18n="zone_filter_label">BMC Zone:</span>
+      <button onclick="filterZone('all')" class="zone-pill-btn px-3 py-1.5 rounded-lg bg-civic-700 text-white font-medium text-xs whitespace-nowrap transition-all shadow-xs" data-zone="all" data-i18n="zone_all">All Zones</button>
+      <button onclick="filterZone('North')" class="zone-pill-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium text-xs whitespace-nowrap transition-all" data-zone="North" data-i18n="zone_north">North Zone</button>
+      <button onclick="filterZone('South-East')" class="zone-pill-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium text-xs whitespace-nowrap transition-all" data-zone="South-East" data-i18n="zone_southeast">South-East Zone</button>
+      <button onclick="filterZone('South-West')" class="zone-pill-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium text-xs whitespace-nowrap transition-all" data-zone="South-West" data-i18n="zone_southwest">South-West Zone</button>
     </div>
   </div>
 
-  <!-- Live Bin Telemetry Cards Grid -->
-  <div id="binsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <% bins.forEach(bin => { %>
-      <div 
-        class="bin-card bg-white rounded-2xl border border-surface-border p-5 shadow-xs hover:shadow-md transition-all duration-200"
-        data-ward-name="<%= bin.wardName %>"
-        data-bin-id="<%= bin.binId %>">
-        
-        <!-- Card Header: ID, Stream & Status Badge -->
-        <div class="flex items-center justify-between gap-2 mb-3">
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-sm text-slate-900 tracking-tight"><%= bin.binId %></span>
-            <% if (bin.wasteStream === 'Wet') { %>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                <i data-lucide="apple" class="w-3 h-3"></i>
-                <span data-i18n="stream_wet">Wet (Organic)</span>
-              </span>
-            <% } else { %>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 flex items-center gap-1">
-                <i data-lucide="box" class="w-3 h-3"></i>
-                <span data-i18n="stream_dry">Dry (Recyclable)</span>
-              </span>
-            <% } %>
-          </div>
+  <!-- Interactive Leaflet Map Card -->
+  <div class="bg-white rounded-2xl border border-surface-border p-2 sm:p-3 shadow-sm relative">
+    
+    <!-- Leaflet Map Container -->
+    <div id="bhubaneswarMap" class="h-[420px] sm:h-[560px] w-full rounded-xl overflow-hidden relative z-0"></div>
 
-          <!-- Dynamic Status Badge -->
-          <span class="status-pill px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 <%= bin.status === 'Critical' ? 'bg-rose-100 text-rose-800 border border-rose-200' : (bin.status === 'Filling' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200') %>">
-            <span class="w-1.5 h-1.5 rounded-full <%= bin.status === 'Critical' ? 'bg-rose-600' : (bin.status === 'Filling' ? 'bg-amber-600' : 'bg-emerald-600') %>"></span>
-            <span class="status-text"><%= bin.status %></span>
+    <!-- Map Legend Bar -->
+    <div class="mt-3 px-2 py-1 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-600">
+      <div class="flex items-center gap-3 flex-wrap">
+        <span class="flex items-center gap-1 font-medium">
+          <span class="w-3 h-3 rounded-full bg-emerald-600 border border-white inline-block"></span>
+          <span data-i18n="status_normal">Normal (&lt;50%)</span>
+        </span>
+        <span class="flex items-center gap-1 font-medium">
+          <span class="w-3 h-3 rounded-full bg-amber-500 border border-white inline-block"></span>
+          <span data-i18n="status_filling">Filling (50-80%)</span>
+        </span>
+        <span class="flex items-center gap-1 font-bold text-rose-700">
+          <span class="w-3 h-3 rounded-full bg-rose-600 border border-white inline-block animate-pulse"></span>
+          <span data-i18n="status_critical">Critical (&gt;80%)</span>
+        </span>
+      </div>
+
+      <!-- Facility Badges -->
+      <div class="flex items-center gap-3 text-[11px]">
+        <span class="flex items-center gap-1 font-semibold text-emerald-800">
+          <span class="w-3 h-3 rounded bg-emerald-700 text-white flex items-center justify-center text-[8px] font-bold">M</span>
+          <span>Niladri Vihar MCC</span>
+        </span>
+        <span class="flex items-center gap-1 font-semibold text-blue-800">
+          <span class="w-3 h-3 rounded bg-blue-700 text-white flex items-center justify-center text-[8px] font-bold">R</span>
+          <span>Pokhariput MRF</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Route Optimization & Impact Metrics (Revealed when routes calculated) -->
+  <div id="impactSummarySection" class="space-y-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      
+      <!-- Card 1: Critical Bins Flagged -->
+      <div class="bg-white rounded-2xl border border-surface-border p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500" data-i18n="metric_critical_bins">Critical Bins Flagged</span>
+          <div class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="metricCriticalCount" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</span>
+          <span class="text-xs text-rose-600 font-semibold">Immediate Action</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Requiring rapid truck clearance</p>
+      </div>
+
+      <!-- Card 2: Optimized Route Distance -->
+      <div class="bg-white rounded-2xl border border-surface-border p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500" data-i18n="metric_optimized_dist">Optimized Distance</span>
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-civic-700 flex items-center justify-center">
+            <i data-lucide="navigation" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="metricDistance" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0 km</span>
+        </div>
+        <p id="metricSavedDist" class="text-[11px] text-civic-700 font-medium mt-1">0 km saved</p>
+      </div>
+
+      <!-- Card 3: Fuel & CO2 Saved -->
+      <div class="bg-white rounded-2xl border border-surface-border p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500" data-i18n="metric_savings">Fuel & CO₂ Saved</span>
+          <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+            <i data-lucide="leaf" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="mt-2">
+          <span id="metricFuelSaved" class="text-lg sm:text-xl font-extrabold text-slate-900">0 L (0 kg CO₂)</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Vs unoptimized circular sweep</p>
+      </div>
+
+      <!-- Card 4: Mo Khata Organic Compost Yield -->
+      <div class="bg-white rounded-2xl border border-surface-border p-4 sm:p-5 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500" data-i18n="metric_compost_yield">Mo Khata Compost Yield</span>
+          <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+            <i data-lucide="sprout" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="mt-2 flex items-baseline gap-2">
+          <span id="metricCompost" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0 kg</span>
+          <span class="text-xs text-purple-700 font-semibold">Mo Khata Bio-Fertilizer</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">Processed at Niladri Vihar MCC</p>
+      </div>
+
+    </div>
+
+    <!-- Turn-by-Turn Driver Manifest (Dual-Stream) -->
+    <div id="driverManifestSection" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4">
+      
+      <!-- Wet Waste Route Card -->
+      <div class="bg-white rounded-2xl border border-surface-border p-5 shadow-xs">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+            <h3 class="text-sm font-bold text-slate-900" data-i18n="route_wet_heading">
+              🟢 Wet Waste Stream -> Niladri Vihar MCC
+            </h3>
+          </div>
+          <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            Truck: BMC-WET-01
           </span>
         </div>
+        <div id="wetRouteStopsList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+      </div>
 
-        <!-- Location Info -->
-        <div class="text-xs text-slate-500 mb-3 space-y-0.5">
-          <div class="font-semibold text-slate-800 flex items-center gap-1">
-            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-civic-700"></i>
-            <span>Ward <%= bin.wardNumber %>: <%= bin.wardName %></span>
-            <span class="text-[10px] text-slate-400 font-normal">(<%= bin.zone %> Zone)</span>
+      <!-- Dry Waste Route Card -->
+      <div class="bg-white rounded-2xl border border-surface-border p-5 shadow-xs">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-blue-600"></span>
+            <h3 class="text-sm font-bold text-slate-900" data-i18n="route_dry_heading">
+              🔵 Dry Waste Stream -> Pokhariput MRF
+            </h3>
           </div>
-          <div class="text-[11px] text-slate-400 pl-4.5">
-            GPS: <%= bin.lat.toFixed(4) %>°N, <%= bin.lng.toFixed(4) %>°E
-          </div>
+          <span class="text-[11px] font-bold text-blue-800 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+            Truck: BMC-DRY-01
+          </span>
         </div>
+        <div id="dryRouteStopsList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+      </div>
 
-        <!-- Fill Level Progress -->
-        <div class="mt-4 pt-3 border-t border-slate-100">
-          <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="font-medium text-slate-600" data-i18n="bin_level">Fill Level</span>
-            <span class="font-bold text-slate-900 fill-level-text"><%= bin.fillLevel %>%</span>
-          </div>
-          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
-            <div 
-              class="fill-progress-bar h-full rounded-full transition-all duration-500 <%= bin.fillLevel >= 80 ? 'bg-rose-600' : (bin.fillLevel >= 50 ? 'bg-amber-500' : 'bg-emerald-600') %>"
-              style="width: <%= bin.fillLevel %>%">
+    </div>
+  </div>
+
+  <!-- Live BMC 1929 Citizen Grievance Reports (Stage 2 Integration Feed) -->
+  <div class="bg-white rounded-2xl border border-surface-border p-5 sm:p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-xl bg-amber-50 text-terracotta-600 flex items-center justify-center">
+          <i data-lucide="radio" class="w-4 h-4 text-terracotta-600 animate-pulse"></i>
+        </div>
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900" data-i18n="live_tickets_feed">
+            Live BMC 1929 Citizen Tickets
+          </h3>
+          <p class="text-[11px] text-slate-400">Crowdsourced citizen reports triggering sanitation alerts</p>
+        </div>
+      </div>
+      <span class="text-xs text-emerald-700 font-semibold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+        1929 Dispatch Active
+      </span>
+    </div>
+
+    <div class="space-y-2.5">
+      <% if (typeof tickets !== 'undefined' && tickets && tickets.length > 0) { %>
+        <% tickets.forEach(t => { %>
+          <div class="p-3 rounded-xl border border-surface-border bg-slate-50/60 flex items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-900 font-bold flex items-center justify-center flex-shrink-0">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-terracotta-600"></i>
+              </span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold text-slate-900"><%= t.ticketId %></span>
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200" data-i18n="status_dispatched">
+                    DISPATCHED
+                  </span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-0.5"><%= t.wardName %> • <%= t.wasteCategory %></p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-[11px] text-slate-400">
+                <%= new Date(t.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+              </span>
             </div>
           </div>
+        <% }) %>
+      <% } else { %>
+        <div class="text-center py-6 text-xs text-slate-400" data-i18n="no_tickets_yet">
+          No active overflow tickets recorded.
         </div>
-
-        <!-- Telemetry Footer -->
-        <div class="mt-3 flex items-center justify-between text-[11px] text-slate-400">
-          <span class="flex items-center gap-1">
-            <i data-lucide="radio" class="w-3 h-3 text-emerald-600"></i>
-            <span data-i18n="bin_last_update">Updated</span>: <span class="last-updated-text" data-i18n="just_now">Just now</span>
-          </span>
-          <span class="text-[10px] text-slate-400 font-mono">ID:<%= bin.binId %></span>
-        </div>
-
-      </div>
-    <% }) %>
+      <% } %>
+    </div>
   </div>
 
 </div>
 
-<!-- Real-time Polling Script for Map View -->
-<script>
-  let activeFilter = 'all';
-
-  function filterBins(ward) {
-    activeFilter = ward;
-    document.querySelectorAll('.ward-filter-btn').forEach(btn => {
-      if (btn.getAttribute('data-ward') === ward) {
-        btn.className = "ward-filter-btn px-3 py-1.5 rounded-lg bg-civic-700 text-white font-medium whitespace-nowrap transition-all";
-      } else {
-        btn.className = "ward-filter-btn px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium whitespace-nowrap transition-all";
-      }
-    });
-
-    document.querySelectorAll('.bin-card').forEach(card => {
-      const cardWard = card.getAttribute('data-ward-name');
-      if (ward === 'all' || cardWard === ward) {
-        card.style.display = 'block';
-      } else {
-        card.style.display = 'none';
-      }
-    });
-  }
-
-  // Poll GET /api/bins every 6 seconds to reflect IoT simulator telemetry
-  async function fetchLiveBins() {
-    try {
-      const res = await fetch('/api/bins');
-      const json = await res.json();
-      if (json.success && json.data) {
-        json.data.forEach(bin => {
-          const card = document.querySelector(`.bin-card[data-bin-id="${bin.binId}"]`);
-          if (card) {
-            // Update fill level
-            const fillText = card.querySelector('.fill-level-text');
-            if (fillText) fillText.textContent = `${bin.fillLevel}%`;
-
-            const progressBar = card.querySelector('.fill-progress-bar');
-            if (progressBar) {
-              progressBar.style.width = `${bin.fillLevel}%`;
-              progressBar.className = `fill-progress-bar h-full rounded-full transition-all duration-500 ${
-                bin.fillLevel >= 80 ? 'bg-rose-600' : (bin.fillLevel >= 50 ? 'bg-amber-500' : 'bg-emerald-600')
-              }`;
-            }
-
-            // Update status pill
-            const statusPill = card.querySelector('.status-pill');
-            const statusText = card.querySelector('.status-text');
-            if (statusPill && statusText) {
-              statusText.textContent = bin.status;
-              statusPill.className = `status-pill px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 ${
-                bin.status === 'Critical' ? 'bg-rose-100 text-rose-800 border border-rose-200' :
-                (bin.status === 'Filling' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200')
-              }`;
-              const dot = statusPill.querySelector('span');
-              if (dot) {
-                dot.className = `w-1.5 h-1.5 rounded-full ${
-                  bin.status === 'Critical' ? 'bg-rose-600' : (bin.status === 'Filling' ? 'bg-amber-600' : 'bg-emerald-600')
-                }`;
-              }
-            }
-          }
-        });
-      }
-    } catch (err) {
-      console.warn('Live telemetry poll failed:', err);
-    }
-  }
-
-  // Set interval every 6 seconds
-  setInterval(fetchLiveBins, 6000);
-</script>
+<!-- Leaflet Map Client Script -->
+<script src="/js/map.js"></script>
 
 <%- include('partials/footer') %>

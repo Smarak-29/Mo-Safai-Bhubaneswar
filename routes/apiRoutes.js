@@ -4,6 +4,12 @@ const Bin = require('../models/Bin');
 const User = require('../models/User');
 const Report = require('../models/Report');
 const { requireAuth } = require('./authRoutes');
+const {
+  optimizeRoutes,
+  simulateOverflowSpike,
+  resetAllBins,
+  FACILITIES
+} = require('../utils/routeOptimizer');
 
 // API: Get all bins as JSON
 router.get('/api/bins', async (req, res) => {
@@ -84,19 +90,82 @@ router.post('/account/settings', requireAuth, async (req, res) => {
   }
 });
 
-// City Map View (Telemetry Dashboard)
-router.get('/map', async (req, res) => {
-  let user = null;
-  if (req.session && req.session.userId) {
-    user = await User.findById(req.session.userId);
+// Route Optimization API (Dual-Stream Haversine Nearest-Neighbor)
+router.get('/api/optimize-route', async (req, res) => {
+  try {
+    const zone = req.query.zone;
+    const result = await optimizeRoutes(zone);
+    res.json(result);
+  } catch (err) {
+    console.error('Error optimizing routes:', err);
+    res.status(500).json({ success: false, error: err.message });
   }
-  const bins = await Bin.find().sort({ wardNumber: 1 });
-  res.render('map', {
-    pageTitle: 'City Map',
-    activeTab: 'map',
-    user,
-    bins
-  });
+});
+
+// Demo Control: Simulate Overflow Spike (Boost 3-4 random bins to 85%-96%)
+router.post('/api/simulate-spike', async (req, res) => {
+  try {
+    const result = await simulateOverflowSpike();
+    res.json({
+      success: true,
+      message: 'Overflow spike simulated for demonstration',
+      count: result.count,
+      data: result.updated
+    });
+  } catch (err) {
+    console.error('Error simulating spike:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Demo Control: Reset All Bins to healthy levels (20%-65%)
+router.post('/api/reset-bins', async (req, res) => {
+  try {
+    const result = await resetAllBins();
+    res.json({
+      success: true,
+      message: 'All smart bins reset to healthy operating levels',
+      count: result.count,
+      data: result.updated
+    });
+  } catch (err) {
+    console.error('Error resetting bins:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Municipal Command Map View (Leaflet.js + Dual-Stream Route Optimizer)
+router.get('/map', async (req, res) => {
+  try {
+    let user = null;
+    if (req.session && req.session.userId) {
+      user = await User.findById(req.session.userId);
+    }
+    const bins = await Bin.find().sort({ wardNumber: 1 });
+    // Fetch recent BMC 1929 grievance tickets from Stage 2
+    const tickets = await Report.find({ isOverflowing: true })
+      .sort({ createdAt: -1 })
+      .limit(6);
+
+    res.render('map', {
+      pageTitle: 'Municipal Command Map',
+      activeTab: 'map',
+      user,
+      bins,
+      tickets,
+      facilities: FACILITIES
+    });
+  } catch (err) {
+    console.error('Error loading map view:', err);
+    res.render('map', {
+      pageTitle: 'Municipal Command Map',
+      activeTab: 'map',
+      user: null,
+      bins: [],
+      tickets: [],
+      facilities: FACILITIES
+    });
+  }
 });
 
 // Smart Waste Scanner View
